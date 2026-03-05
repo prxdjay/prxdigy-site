@@ -121,7 +121,7 @@
       .mobile-toggle{display:flex}
       section{padding:80px 24px}
       .services-grid{grid-template-columns:1fr}
-      .contact-grid{grid-template-columns:1fr;gap:40px}
+      .contact-grid{grid-template-columns:1fr;gap:2px}
       .hero-cta{flex-direction:column;align-items:center}
       .picker-options{flex-direction:column;align-items:center}
       .picker-card{width:260px;padding:36px 28px;z-index:5;pointer-events:auto}
@@ -137,7 +137,7 @@
   <div id="locationPicker">
     <div class="picker-glow"></div>
     <div class="picker-content">
-            <video autoplay loop muted playsinline class="picker-logo" style="pointer-events:none"><source src="logo.mp4" type="video/mp4"></video>
+            <video autoplay loop muted playsinline preload="none" class="picker-logo" style="pointer-events:none"><source src="logo.mp4" type="video/mp4"></video>
       <p class="picker-prompt">Choose your location</p>
       <div class="picker-options">
         <div class="picker-card" onclick="selectLocation('brooklyn')">
@@ -300,6 +300,8 @@
 </script>
 </body>
 </html>
+
+
 
 
 
