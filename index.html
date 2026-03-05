@@ -108,14 +108,11 @@
     .marquee span.red{color:var(--red);opacity:.3}
     @keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 
-    .contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;margin-top:60px}
-    .contact-item{margin-bottom:40px}
-    .contact-item-label{font-size:.7rem;letter-spacing:.3em;text-transform:uppercase;color:var(--gray);margin-bottom:8px}
-    .contact-item-value{font-size:1.1rem;font-weight:400}
-    .contact-item-value a{color:var(--white);text-decoration:none;transition:color .3s ease}
-    .contact-item-value a:hover{color:var(--red)}
-    .contact-cta{display:flex;flex-direction:column;justify-content:center;align-items:flex-start}
-    .contact-cta p{color:var(--gray);font-size:1.05rem;line-height:1.8;font-weight:300;margin-bottom:32px}
+    
+    
+    
+    
+    
     .social-links{display:flex;gap:24px;margin-top:20px}
     .social-links a{color:var(--gray);text-decoration:none;font-size:.8rem;letter-spacing:.15em;text-transform:uppercase;font-weight:500;transition:color .3s ease;position:relative}
     .social-links a::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:1px;background:var(--red);transition:width .3s ease}
@@ -138,7 +135,7 @@
       .mobile-toggle{display:flex}
       section{padding:80px 24px}
       .services-grid{grid-template-columns:1fr}
-      .contact-grid{grid-template-columns:1fr;gap:2px}
+      
       .hero-cta{flex-direction:column;align-items:center}
       .picker-options{flex-direction:column;align-items:center}
       .picker-card{width:260px;padding:36px 28px;z-index:5;pointer-events:auto}
@@ -183,7 +180,6 @@
     </a>
     <ul class="nav-links" id="navLinks">
       <li><a href="#services" onclick="closeNav()">Services</a></li>
-      <li><a href="#contact" onclick="closeNav()">Contact</a></li>
       <li><a href="https://app.squareup.com/appointments/book/4jnoq0zr02cfdq/L299EJH3XE4SK/start" target="_blank" class="nav-book" onclick="closeNav()">Book Now</a></li>
     </ul>
     <div class="mobile-toggle" onclick="toggleNav()"><span></span><span></span><span></span></div>
@@ -223,21 +219,8 @@
     <span>RECORD</span><span class="red">&#215;</span><span>CREATE</span><span class="red">&#215;</span><span>DEVELOP</span><span class="red">&#215;</span><span>ELEVATE</span><span class="red">&#215;</span><span>RECORD</span><span class="red">&#215;</span><span>CREATE</span><span class="red">&#215;</span><span>DEVELOP</span><span class="red">&#215;</span><span>ELEVATE</span><span class="red">&#215;</span>
   </div></div>
 
-  <section id="contact">
-    <div class="reveal"><p class="section-label">Get In Touch</p><h2 class="section-title">Contact</h2></div>
-    <div class="contact-grid">
-      <div class="reveal">
-        <div class="contact-item"><p class="contact-item-label">Email</p><p class="contact-item-value"><a href="mailto:prxdigystudio@gmail.com">prxdigystudio@gmail.com</a></p></div>
-        <div class="contact-item"><p class="contact-item-label">Locations</p><p class="contact-item-value">Brooklyn, NY &nbsp;&#8226;&nbsp; Long Island, NY</p></div>
-        <div class="contact-item"><p class="contact-item-label">Booking</p><p class="contact-item-value"><a href="https://app.squareup.com/appointments/book/4jnoq0zr02cfdq/L299EJH3XE4SK/start" target="_blank">Book through Square</a></p></div>
-        <div class="social-links">
-          <a href="https://www.instagram.com/prxdigystudio" target="_blank">Instagram</a>
-          <a href="https://www.youtube.com/@prxdigystudio" target="_blank">YouTube</a>
-          <a href="https://www.threads.net/@prxd.jay" target="_blank">Threads</a>
         </div>
       </div>
-      <div class="contact-cta reveal">
-        <p>PRXDIGY Studios is more than a recording studio &#8212; it&#39;s a creative development hub for artists ready to level up. Whether you need a session, a project produced, or a full rollout, we build with you.</p>
         <a href="https://app.squareup.com/appointments/book/4jnoq0zr02cfdq/L299EJH3XE4SK/start" target="_blank" class="btn-primary">Book a Session</a>
       </div>
     </div>
@@ -253,31 +236,6 @@
   </footer>
 
   <script>
-    
-
-    let currentLocation=null;
-    function selectLocation(loc){
-      currentLocation=loc;
-      document.getElementById('locationPicker').classList.add('hidden');document.body.classList.remove('picker-open');
-      document.body.classList.remove('loc-brooklyn','loc-longisland');
-      document.body.classList.add('loc-'+loc);
-      const badge=document.getElementById('navBadge');
-      const heroTag=document.getElementById('heroTag');
-      if(loc==='brooklyn'){badge.textContent='Brooklyn';heroTag.textContent='Brooklyn Recording Studio'}
-      else{badge.textContent='Long Island';heroTag.textContent='Long Island Recording Studio'}
-      window.scrollTo(0,0);
-    }
-    function showPicker(){
-      document.getElementById('locationPicker').classList.remove('hidden');document.body.classList.add('picker-open');
-      document.body.classList.remove('loc-brooklyn','loc-longisland');
-    }
-    function toggleNav(){document.getElementById('navLinks').classList.toggle('open')}
-    function closeNav(){document.getElementById('navLinks').classList.remove('open')}
-    const observer=new IntersectionObserver((entries)=>{
-      entries.forEach(entry=>{if(entry.isIntersecting)entry.target.classList.add('visible')});
-    },{threshold:.1,rootMargin:'0px 0px -50px 0px'});
-    document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
-  </script><script>
   let currentLocation = null;
 
   function selectLocation(loc) {
@@ -319,6 +277,7 @@
 </script>
 </body>
 </html>
+
 
 
 
