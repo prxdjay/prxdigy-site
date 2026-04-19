@@ -42,7 +42,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
    Other options: Zapier, Make.com, Formspree, n8n — just swap WEBHOOK_URL.
    ========================================================== */
 
-const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbz7x0d230bs_ybXRV9nvEF358S6veuCljHXKPvPLKs4RYew9gu3EIYKz1sw_R5K-soHvg/exec';
+const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbzhpmMidqAipSZYgnfBhyVV_DPG8LxxWEVGGiW7YAWiDchUFltfBut5eReJ0jO2sZU5/exec';
 
 const form = document.getElementById('intakeForm');
 const successEl = document.getElementById('formSuccess');
