@@ -228,6 +228,25 @@ section{position:relative;z-index:3;padding:120px 40px;max-width:1400px;margin:0
 @keyframes scroll{to{transform:translateX(-50%)}}
 
 /* ==========================================================
+   1.5 LISTEN TO THE WORK (Spotify)
+   ========================================================== */
+.listen-embed{
+  max-width:960px;margin:0 auto;
+  border:1px solid var(--border);
+  background:var(--black-2);
+  padding:12px;
+  border-radius:14px;
+  position:relative;
+  overflow:hidden;
+  transition:border-color .4s ease, transform .4s ease;
+}
+.listen-embed:hover{border-color:var(--red)}
+.listen-embed iframe{display:block;width:100%;border-radius:10px}
+@media (max-width:720px){
+  .listen-embed iframe{height:352px}
+}
+
+/* ==========================================================
    2. PROOF / PORTFOLIO
    ========================================================== */
 .proof-grid{

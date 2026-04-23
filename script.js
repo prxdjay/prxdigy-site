@@ -112,7 +112,7 @@ form.addEventListener('submit', async (e) => {
     console.error('Submit error:', err);
     submitBtn.innerHTML = originalText;
     submitBtn.disabled = false;
-    alert('Something went wrong. Please text 631-870-9243 directly.');
+    alert('Something went wrong. Please text +1 (888) 495-8012 directly.');
   }
 });
 
