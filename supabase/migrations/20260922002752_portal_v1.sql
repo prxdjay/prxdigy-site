@@ -1,5 +1,4 @@
--- PRXDIGY staff portal schema
--- Run this in the Supabase SQL editor before loading the private menu seed.
+-- PRXDIGY staff portal schema. Private pricing is intentionally not stored in this public migration.
 
 create extension if not exists pgcrypto;
 
@@ -251,5 +250,3 @@ grant select on public.services to authenticated;
 grant select on public.portal_notes to authenticated;
 grant insert, update, delete on public.services to authenticated;
 grant insert, update, delete on public.portal_notes to authenticated;
-
--- The owner uses the separately delivered one-time setup code from the pending screen.

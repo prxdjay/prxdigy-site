@@ -98,6 +98,15 @@
           <span id="pendingEmail" class="mono-chip"></span>
           <button class="text-button" id="pendingSignOut" type="button">Sign out</button>
         </div>
+        <details class="owner-setup">
+          <summary>Setting up the first owner account?</summary>
+          <form id="ownerSetupForm" class="auth-form" novalidate>
+            <p class="muted">Enter the private one-time owner code delivered with the portal.</p>
+            <label>Owner setup code<input id="ownerSetupCode" type="password" autocomplete="off" required></label>
+            <button class="primary-button" type="submit"><span>Activate owner access</span><b>→</b></button>
+            <p id="ownerSetupMessage" class="form-message" role="status" aria-live="polite"></p>
+          </form>
+        </details>
       </div>
     </section>
 

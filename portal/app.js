@@ -485,6 +485,33 @@
     document.getElementById('pendingSignOut').addEventListener('click', signOut);
     document.getElementById('rejectedSignOut').addEventListener('click', signOut);
 
+    document.getElementById('ownerSetupForm').addEventListener('submit', event => {
+      event.preventDefault();
+      const message = document.getElementById('ownerSetupMessage');
+      message.textContent = '';
+      message.classList.remove('success');
+      withBusy(event.currentTarget, async () => {
+        const inputCode = document.getElementById('ownerSetupCode').value.trim();
+        if (!inputCode) {
+          message.textContent = 'Enter the one-time owner setup code.';
+          return;
+        }
+        const { data, error } = await client.rpc('claim_portal_owner', { input_code: inputCode });
+        if (error) {
+          message.textContent = friendlyError(error);
+          return;
+        }
+        if (!data) {
+          message.textContent = 'That code is invalid or has already been used.';
+          return;
+        }
+        document.getElementById('ownerSetupCode').value = '';
+        message.textContent = 'Owner access activated. Opening the portal…';
+        message.classList.add('success');
+        await handleSession(state.session);
+      });
+    });
+
     document.getElementById('serviceSearch').addEventListener('input', event => {
       state.query = event.target.value.trim();
       const definition = viewDefinitions[state.currentView];
