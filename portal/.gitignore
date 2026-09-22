@@ -1,0 +1,3 @@
+# Replace portal/config.js values during setup. The anon key is designed for browsers,
+# but keeping environment-specific configuration separate prevents accidental mixups.
+
