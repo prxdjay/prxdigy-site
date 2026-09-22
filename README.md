@@ -2,6 +2,10 @@
 
 Single-page funnel. Black/red cinematic. GitHub Pages ready.
 
+## Staff portal
+
+The private staff portal lives at `/portal/`. It uses Supabase authentication and row-level security so pricing is never embedded in this public repository. See [`portal/README.md`](portal/README.md) for setup and account-approval instructions.
+
 ---
 
 ## Deploy (GitHub Pages)
