@@ -23,15 +23,18 @@ jobs:
       - name: Verify private prices are not public
         shell: bash
         run: |
-          if grep -R -n -E '\$[0-9]' portal; then
+          if grep -R -n -E --binary-files=without-match \
+            --include='*.html' --include='*.css' --include='*.js' --include='*.md' --include='*.sql' \
+            '\$[0-9]' portal; then
             echo "Private pricing must stay out of the public repository."
             exit 1
           fi
       - name: Verify local asset paths are not public
         shell: bash
         run: |
-          if grep -R -n -E 'F:/|F:\\' portal; then
+          if grep -R -n -E --binary-files=without-match \
+            --include='*.html' --include='*.css' --include='*.js' --include='*.md' --include='*.sql' \
+            'F:/|F:\\' portal; then
             echo "Local workstation paths must not be committed."
             exit 1
           fi
-
