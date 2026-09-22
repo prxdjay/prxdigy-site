@@ -19,7 +19,6 @@
   const pages = {
     home: document.getElementById('pageHome'),
     menu: document.getElementById('pageMenu'),
-    playbook: document.getElementById('pagePlaybook'),
     team: document.getElementById('pageTeam')
   };
 
@@ -66,7 +65,6 @@
     session: null,
     profile: null,
     services: [],
-    notes: [],
     currentView: 'home',
     activeAudience: 'all',
     query: ''
@@ -131,14 +129,9 @@
   }
 
   async function loadPortalData() {
-    const [servicesResult, notesResult] = await Promise.all([
-      client.from('services').select('*').order('sort_order').order('name'),
-      client.from('portal_notes').select('*').order('sort_order')
-    ]);
+    const servicesResult = await client.from('services').select('*').order('sort_order').order('name');
     if (servicesResult.error) throw servicesResult.error;
-    if (notesResult.error) throw notesResult.error;
     state.services = servicesResult.data || [];
-    state.notes = notesResult.data || [];
   }
 
   async function handleSession(session) {
@@ -167,7 +160,6 @@
 
       await loadPortalData();
       hydrateMemberUI();
-      renderPlaybookNotes();
       showOnlyScreen('portal');
       navigate('home');
     } catch (error) {
@@ -199,8 +191,6 @@
     if (viewDefinitions[view]) {
       pages.menu.hidden = false;
       setupMenuView(viewDefinitions[view]);
-    } else if (view === 'playbook') {
-      pages.playbook.hidden = false;
     } else if (view === 'team') {
       pages.team.hidden = false;
       loadTeamMembers();
@@ -339,24 +329,6 @@
       list.append(li);
     });
     return card;
-  }
-
-  function renderPlaybookNotes() {
-    const container = document.getElementById('playbookNotes');
-    container.replaceChildren();
-    state.notes.filter(note => note.section === 'playbook' || note.section === 'terms').forEach(note => {
-      const article = document.createElement('article');
-      article.className = 'note-card glass-panel';
-      const label = document.createElement('div');
-      label.className = 'panel-label';
-      label.textContent = note.section.toUpperCase();
-      const title = document.createElement('h3');
-      title.textContent = note.title;
-      const body = document.createElement('p');
-      body.textContent = note.body;
-      article.append(label, title, body);
-      container.append(article);
-    });
   }
 
   async function loadTeamMembers() {

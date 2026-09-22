@@ -122,8 +122,7 @@
           <button class="rail-link" type="button" data-nav="brooklyn"><span>02</span>Brooklyn</button>
           <button class="rail-link" type="button" data-nav="long-island"><span>03</span>Long Island</button>
           <button class="rail-link" type="button" data-nav="creative"><span>04</span>Creative Projects</button>
-          <button class="rail-link" type="button" data-nav="playbook"><span>05</span>Sales Playbook</button>
-          <button class="rail-link admin-only" id="teamAccessNav" type="button" data-nav="team" hidden><span>06</span>Team Access</button>
+          <button class="rail-link admin-only" id="teamAccessNav" type="button" data-nav="team" hidden><span>05</span>Team Access</button>
         </nav>
         <div class="rail-footer">
           <div class="member-block">
@@ -151,38 +150,34 @@
           <div class="division-grid">
             <button class="division-card brooklyn-card" type="button" data-nav="brooklyn">
               <span class="card-index">01 / STUDIO</span>
+              <img class="division-logo studio-logo" src="../assets/logo.png" alt="">
               <span class="card-copy"><span class="card-title">Brooklyn</span><span class="card-description">Studio services, loyalty pricing, newcomer offers, and monthly plans.</span></span>
               <span class="card-arrow">↗</span>
             </button>
             <button class="division-card long-island-card" type="button" data-nav="long-island">
               <span class="card-index">02 / STUDIO</span>
+              <img class="division-logo studio-logo" src="../assets/logo.png" alt="">
               <span class="card-copy"><span class="card-title">Long Island</span><span class="card-description">Location-specific recording rates and confirmed offers.</span></span>
               <span class="card-arrow">↗</span>
             </button>
             <button class="division-card creative-card" type="button" data-nav="creative">
               <span class="card-index">03 / PCP</span>
-              <img class="division-watermark" src="assets/pcp-logo.png" alt="">
+              <img class="division-logo creative-logo" src="assets/pcp-logo.png" alt="">
               <span class="card-copy"><span class="card-title">Creative Projects</span><span class="card-description">Artist projects, business content, and commercial production.</span></span>
               <span class="card-arrow">↗</span>
             </button>
           </div>
 
-          <div class="home-lower-grid">
-            <section class="glass-panel focus-panel">
-              <div class="panel-label">SALES RULE / 001</div>
-              <h3>Recommend. Don’t overwhelm.</h3>
-              <p>Identify who they are, what they want to accomplish, and whether the right next step is a standalone project or a recurring relationship.</p>
-              <button class="text-button" type="button" data-nav="playbook">Open the playbook →</button>
-            </section>
-            <section class="glass-panel quick-panel">
-              <div class="panel-label">QUICK TOOLS</div>
-              <div class="quick-list">
-                <button type="button" data-placeholder="New Lead / Lead Notes">New lead <span>Coming next</span></button>
-                <button type="button" data-placeholder="Proposal Tools">Proposal tools <span>Coming next</span></button>
-                <button type="button" data-placeholder="Booking & Client Support">Booking support <span>Coming next</span></button>
-              </div>
-            </section>
-          </div>
+          <section class="brand-mark-row" aria-label="PRXDIGY divisions">
+            <div class="brand-mark">
+              <img src="../assets/logo.png" alt="PRXDIGY Studio">
+              <span>PRXDIGY STUDIO / BROOKLYN + LONG ISLAND</span>
+            </div>
+            <div class="brand-mark">
+              <img src="assets/pcp-logo.png" alt="PRXDIGY Creative Projects">
+              <span>PRXDIGY CREATIVE PROJECTS</span>
+            </div>
+          </section>
         </div>
 
         <div id="pageMenu" class="portal-page" hidden>
@@ -209,24 +204,6 @@
             <p class="eyebrow">NO MATCH</p>
             <h2>Try a different search.</h2>
           </div>
-        </div>
-
-        <div id="pagePlaybook" class="portal-page" hidden>
-          <header class="page-intro">
-            <button class="back-button" type="button" data-nav="home">← Portal home</button>
-            <p class="eyebrow">SALES PLAYBOOK</p>
-            <h1>Move the conversation forward.</h1>
-            <p>Use the menu as a decision tool. The client should hear the recommendation—not the entire catalog.</p>
-          </header>
-          <ol class="flow-track">
-            <li><span>01</span><strong>Identify</strong><p>Who are they?</p></li>
-            <li><span>02</span><strong>Clarify</strong><p>What outcome do they want?</p></li>
-            <li><span>03</span><strong>Match</strong><p>Which offer fits?</p></li>
-            <li><span>04</span><strong>Recommend</strong><p>One best option.</p></li>
-            <li><span>05</span><strong>Close</strong><p>Deposit and booking.</p></li>
-            <li><span>06</span><strong>Retain</strong><p>Follow up and expand.</p></li>
-          </ol>
-          <div id="playbookNotes" class="notes-grid"></div>
         </div>
 
         <div id="pageTeam" class="portal-page" hidden>
