@@ -3,9 +3,9 @@
 
   const config = window.PRXDIGY_CONFIG || {};
   const hasConfig = /^https:\/\//.test(config.supabaseUrl || '') &&
-    config.supabaseAnonKey &&
+    config.supabasePublishableKey &&
     !config.supabaseUrl.includes('YOUR_') &&
-    !config.supabaseAnonKey.includes('YOUR_');
+    !config.supabasePublishableKey.includes('YOUR_');
 
   const screens = {
     boot: document.getElementById('bootScreen'),
@@ -507,7 +507,7 @@
       showOnlyScreen('config');
       return;
     }
-    client = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {
+    client = window.supabase.createClient(config.supabaseUrl, config.supabasePublishableKey, {
       auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
     });
     bindEvents();
