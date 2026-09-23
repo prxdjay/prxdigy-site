@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="/public.css">
 <style>
   /* Legal page styles — inline to avoid touching main stylesheet */
   .legal-wrap{
@@ -104,21 +104,20 @@
 </head>
 <body>
 
-<!-- TEXTURE OVERLAYS -->
-<div class="grid-overlay"></div>
-<div class="noise-overlay"></div>
-
-<!-- NAV -->
-<nav class="nav">
-  <a href="index.html" class="nav-logo">
-    <img src="assets/logo.png" alt="PRXDIGY STUDIO" class="nav-logo-img">
-    <span class="logo-text">PRXDIGY<span class="red">/</span>STUDIO</span>
-  </a>
-  <div class="nav-status">
-    <span class="status-dot"></span>
-    <span class="status-text">NOW BOOKING</span>
-  </div>
-</nav>
+<!-- PUBLIC HEADER START -->
+<a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="header-inner wrap">
+      <a class="brand" href="/" aria-label="PRXDIGY home"><img src="/assets/public/wordmark.webp" alt="PRXDIGY" width="1200" height="400"></a>
+      <nav class="site-nav" id="primary-nav" aria-label="Primary navigation">
+        <a href="/studio/long-island/">Long Island</a><a href="/creative-projects/">Creative Projects</a><a href="/studio/brooklyn/">Brooklyn</a>
+        <a href="/#contact">Contact</a>
+      </nav>
+      <a class="header-cta" href="/#contact" aria-label="Start a Project"><span class="header-cta-full">Start a Project</span><span class="header-cta-short" aria-hidden="true">Start</span><span aria-hidden="true">↗</span></a>
+      <button class="menu-toggle" type="button" aria-label="Open navigation" aria-controls="primary-nav" aria-expanded="false"><span></span><span></span></button>
+    </div>
+  </header>
+<!-- PUBLIC HEADER END -->
 
 <main class="legal-wrap">
   <a href="index.html" class="legal-back">← BACK TO SITE</a>
@@ -185,24 +184,21 @@
   <div class="legal-contact">
     <p>QUESTIONS? CONTACT US</p>
     <p>EMAIL: <a href="mailto:prxd.jay@gmail.com">prxd.jay@gmail.com</a></p>
-    <p>PHONE: <a href="sms:+18884958012">+1 (888) 495-8012</a></p>
+    <p>PHONE: <a href="sms:+16318709243">631-870-9243</a></p>
   </div>
 </main>
 
-<!-- FOOTER -->
-<footer class="footer">
-  <div class="footer-grid">
-    <div class="footer-brand">
-      <img src="assets/logo.png" alt="PRXDIGY STUDIO" class="footer-logo-img">
-      <span>PRXDIGY/STUDIO</span>
+<!-- PUBLIC FOOTER START -->
+<footer class="site-footer" id="footer">
+    <div class="wrap footer-top">
+      <div class="footer-identity"><a href="/" aria-label="PRXDIGY home"><img src="/assets/public/wordmark.webp" alt="PRXDIGY" width="1200" height="400"></a><p>Music. Content. Direction. Growth.</p></div>
+      <nav aria-label="Footer destinations"><span class="footer-label">Explore</span><a href="/studio/long-island/">Long Island</a><a href="/creative-projects/">Creative Projects</a><a href="/studio/brooklyn/">Brooklyn</a></nav>
+      <div class="footer-contact"><span class="footer-label">Connect</span><a href="https://instagram.com/prxdigystudio" target="_blank" rel="noopener noreferrer">Instagram @prxdigystudio</a><a href="sms:+16318709243">Text 631-870-9243</a></div>
     </div>
-    <div class="footer-meta">
-      <a href="privacy.html" style="color:var(--gray)">PRIVACY POLICY</a>
-      <a href="terms.html" style="color:var(--gray)">TERMS &amp; CONDITIONS</a>
-      <span>© 2026 ALL RIGHTS RESERVED</span>
-    </div>
-  </div>
-</footer>
+    <div class="wrap footer-bottom"><span>© 2026 PRXDIGY</span><div><a href="/privacy.html">Privacy Policy</a><a href="/terms.html">Terms &amp; Conditions</a></div><span>Built for the work.</span></div>
+  </footer>
+<!-- PUBLIC FOOTER END -->
 
+<script src="/public.js" defer></script>
 </body>
 </html>
