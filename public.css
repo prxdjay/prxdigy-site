@@ -444,6 +444,10 @@ h3{font-family:var(--display);line-height:1;letter-spacing:.015em;text-transform
 .team-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto;padding-top:14px}
 .team-link-slot{padding:8px 11px;border:1px dashed var(--line-2);color:var(--subtle);font:500 10px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase}
 
+.team-hero-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(220px,360px);align-items:center;gap:40px}
+.team-badge-stage{height:min(38vh,340px)}
+.emblem-stage{align-self:center;height:min(56vh,480px)}
+.contact-grid .emblem-stage{grid-column:2}
 /* ---------- T&C page ---------- */
 .legal-toc{margin:10px 0 40px;padding:20px 22px;border:1px solid var(--line-2);background:rgba(10,10,13,.6)}
 .legal-toc p{margin:0 0 12px;color:var(--subtle);font:500 10px/1.4 var(--mono);letter-spacing:.18em;text-transform:uppercase}
@@ -550,6 +554,9 @@ h3{font-family:var(--display);line-height:1;letter-spacing:.015em;text-transform
   .team-grid{grid-template-columns:1fr}
   .team-hero{padding-top:130px}
   .brooklyn-hero .line{white-space:normal}
+  .team-hero-grid{grid-template-columns:1fr}
+  .team-badge-stage{height:240px;order:-1}
+  .contact-grid .emblem-stage{grid-column:auto;height:300px;order:-1}
 }
 @media(max-width:640px){
   .hero-stack,.brooklyn-hero .hero-stack{font-size:clamp(42px,11.5vw,70px)}

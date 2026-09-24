@@ -61,6 +61,13 @@
     return env;
   }
   scene.environment = pmrem.fromScene(studioEnv(), 0.02).texture;
+  // The textured models (Meshy exports: base colour + metal/rough maps) read best under a
+  // bright neutral room, the light they were authored in; the dark strip-light studio above
+  // is tuned for the code-built chrome and ruby.
+  const roomEnv = pmrem.fromScene(new T.RoomEnvironment(), 0.04).texture;
+  function authoredLight(obj, intensity = 1) {
+    obj.traverse(n => { if (n.isMesh) { n.material.envMap = roomEnv; n.material.envMapIntensity = intensity; n.material.fog = false; n.material.needsUpdate = true; } });
+  }
 
   // ---------- shared materials + textures ----------
   const rand = (a, b) => a + Math.random() * (b - a);
@@ -271,14 +278,24 @@
     };
   }
 
-  function loadGLB(url) {
-    // Previews that can't serve .glb embed it as base64 (window.PRX_GLB[url basename]).
-    const inline = window.PRX_GLB && window.PRX_GLB[url.split('/').pop()];
+  function gltfLoader() {
+    const loader = new T.GLTFLoader();
+    if (window.MeshoptDecoder) loader.setMeshoptDecoder(window.MeshoptDecoder);
+    return loader;
+  }
+  function loadScript(src) {
+    return new Promise((res, rej) => { const el = document.createElement('script'); el.src = src; el.onload = res; el.onerror = rej; document.head.appendChild(el); });
+  }
+  async function loadGLB(url) {
+    // Preview hosts can't serve .glb, so previews embed each model as base64 in a .glb.js file.
+    const name = url.split('/').pop();
+    if (window.PRX_PREVIEW && !(window.PRX_GLB && window.PRX_GLB[name])) await loadScript(url + '.js');
+    const inline = window.PRX_GLB && window.PRX_GLB[name];
     if (inline) {
       const bytes = Uint8Array.from(atob(inline), ch => ch.charCodeAt(0));
-      return new Promise((res, rej) => new T.GLTFLoader().parse(bytes.buffer, '', g => res(g.scene), rej));
+      return new Promise((res, rej) => gltfLoader().parse(bytes.buffer, '', g => res(g.scene), rej));
     }
-    return new Promise((res, rej) => new T.GLTFLoader().load(url, g => res(g.scene), undefined, rej));
+    return new Promise((res, rej) => gltfLoader().load(url, g => res(g.scene), undefined, rej));
   }
 
   function visibleAt(dist) {
@@ -292,9 +309,11 @@
   const available = new Set((body.dataset.models || '').split(',').filter(Boolean));
   const MODEL_SPEC = {
     'uad-sphere': { turn: [0, 0, 0] },
-    'fuji-xh2s': { turn: [0, -0.5, 0] },
+    'fuji-xh2s': { turn: [0, -0.55, 0] },
     'tlm-103': { turn: [0, 0, 0] },
     'prxdigy-x-final': { turn: [0, 0, 0] },
+    'studio-badge': { turn: [0, 0, 0] },
+    'creative-emblem': { turn: [0, 0, 0] },
   };
   const modelCache = {};
   function getModel(name) {
@@ -309,7 +328,7 @@
         const fit = new T.Group();
         fit.add(obj);
         fit.scale.setScalar(1 / Math.max(size.x, size.y, size.z, 1e-6));
-        fit.traverse(n => { if (n.isMesh) { n.material.envMapIntensity = 1.25; n.material.fog = false; } });
+        authoredLight(fit, 1.05);
         return fit;
       }).catch(() => null);
     }
@@ -355,14 +374,18 @@
       rig.position.y = Math.sin(clock * 0.9) * bob;
     });
   }
-  // The standalone X: the procedural gem right away, swapped for the finalized model if present.
-  function brandX(height, glowAmt) {
+  // The X inside its chrome ring: the code-built version right away, replaced by the finalized
+  // model (which includes the ring) as soon as it loads. `ring` = ring radius in world units.
+  function brandMark(ring, glowAmt, ringThick = ring * 0.07, ringDepth = ring * 0.11) {
     const slot = new T.Group();
-    const proc = makeX(height, glowAmt);
+    const proc = new T.Group();
+    proc.add(makeX(ring * 1.4, glowAmt), makeRing(ring, ringThick, ringDepth));
     slot.add(proc);
     getModel('prxdigy-x-final').then(m => {
       if (!m) return;
-      m.scale.multiplyScalar(height * 1.1);
+      m.scale.multiplyScalar(ring * 2.12);
+      // a touch of self-light on the ruby so it glows like the code-built gem did
+      m.traverse(n => { if (n.isMesh && n.material.map) { n.material.emissive = new T.Color(0x3a0303); n.material.emissiveMap = n.material.map; n.material.emissiveIntensity = 0.55 * Math.min(glowAmt, 3) / 3 + 0.25; } });
       slot.remove(proc);
       slot.add(m);
     });
@@ -384,7 +407,22 @@
     scene.add(wordmark);
     const behind = glow(16, [0, 0.9, -3], 0x7a2230, 0.35);
     scene.add(behind);
-    loadGLB(ASSETS + 'models/prxdigy-wordmark.glb').then(obj => {
+    const useNewMark = available.has('prxdigy-logo-3d') && !/[?&]wm=classic/.test(location.search);
+    if (useNewMark) loadGLB(ASSETS + 'models/prxdigy-logo-3d.glb').then(obj => {
+      obj.updateMatrixWorld(true);
+      const box = new T.Box3().setFromObject(obj);
+      obj.position.sub(box.getCenter(new T.Vector3()));
+      authoredLight(obj, 1.1);
+      const inner = new T.Group();
+      inner.add(obj);
+      inner.userData.width = box.getSize(new T.Vector3()).x;
+      wordmark.add(inner);
+      wordmark.userData.inner = inner;
+      fitWordmark();
+      wordmark.userData.born = clock;
+      body.classList.add('world-wordmark');
+    }).catch(() => body.classList.add('no-wordmark'));
+    else loadGLB(ASSETS + 'models/prxdigy-wordmark.glb').then(obj => {
       obj.rotation.x = Math.PI / 2;
       obj.updateMatrixWorld(true);
       const c = new T.Box3().setFromObject(obj).getCenter(new T.Vector3());
@@ -447,9 +485,8 @@
 
     const mon = new T.Group();
     mon.position.set(0, floorY + 4.6, -18);
-    const X = brandX(5.4, 3);
-    const ring = makeRing(3.9, 0.26, 0.42);
-    mon.add(X, ring);
+    const X = brandMark(3.9, 3, 0.26, 0.42);
+    mon.add(X);
     scene.add(mon);
     const redLight = new T.PointLight(0xff2a1a, 2.5, 26, 1.6);
     redLight.position.set(0, floorY + 3.2, -14.5);
@@ -518,8 +555,7 @@
     scene.add(dust);
 
     const stamp = new T.Group();
-    const X = brandX(3.3, 4);
-    stamp.add(X, makeRing(2.35, 0.2, 0.34));
+    stamp.add(brandMark(2.35, 4, 0.2, 0.34));
     scene.add(stamp);
     sideAnchor(stamp, [3.1, 0.2, -1], [0, 2.6, -3]);
     const light = new T.PointLight(0xff2a1a, 2, 14, 1.8);
@@ -540,8 +576,8 @@
     const gearStage = document.querySelector('[data-anchor="li-gear"]');
     const hasGear = !!gearStage && (available.has('uad-sphere') || available.has('fuji-xh2s'));
     if (hasGear) {
-      [['uad-sphere', { fill: 0.5, desktop: [0, -0.2], mobile: [-0.22, 0] }, { sway: 0.6, base: 0.2 }],
-       ['fuji-xh2s', { fill: 0.4, desktop: [0, 0.24], mobile: [0.24, 0.02] }, { sway: 0.7, base: -0.5 }]].forEach(([name, pin, motion]) => {
+      [['uad-sphere', { fill: 0.64, desktop: [-0.08, -0.19], mobile: [-0.22, 0] }, { sway: 0.6, base: 0.2 }],
+       ['fuji-xh2s', { fill: 0.52, desktop: [0.06, 0.25], mobile: [0.24, 0.04] }, { sway: 0.7, base: -0.5 }]].forEach(([name, pin, motion]) => {
         getModel(name).then(m => {
           if (!m) return;
           const rig = pinTo(gearStage, pin);
@@ -596,8 +632,7 @@
     band.rotation.x = Math.PI / 2;
     // The logo floats inside the glass half; `inner` counter-rotates so it stays upright.
     const inner = new T.Group();
-    const X = brandX(1.0, 5);
-    inner.add(X, makeRing(0.7, 0.06, 0.09));
+    inner.add(brandMark(0.7, 5, 0.06, 0.09));
     inner.position.set(0, -H * 0.85, 0);
     g.add(top, bottom, band, inner);
     g.rotation.z = -Math.PI / 2;
@@ -627,6 +662,14 @@
     holder.add(glow(9, [0, 0, -1.6], 0xff3020, 0.28));
 
     // Springs: pointer and scroll push the pill hard, then it eases back to rest.
+    const emblemStage = document.querySelector('[data-anchor="creative-emblem"]');
+    const hasEmblem = !!emblemStage && available.has('creative-emblem');
+    if (hasEmblem) getModel('creative-emblem').then(m => {
+      if (!m) return;
+      const rig = pinTo(emblemStage, { fill: 0.95 });
+      rig.add(m);
+      presenter(rig, { sway: 0.6, tilt: 0.25, bob: 0.02 });
+    });
     const k = LOW ? 0.5 : 1;
     const st = { ry: -0.35, vy: 0, rx: 0, vx: 0, roll: 0, vroll: 0 };
     spinners.push((f, dt, vel) => {
@@ -649,12 +692,12 @@
         capabilities: { pos: [0.4, -9, 10], look: [0.6, -8, 0], dim: 0.25 },
         work: { pos: [0.2, -11, 10], look: [0.3, -10.4, 0], dim: 0.35 },
         process: { pos: [0, -12.5, 10], look: [0, -12, 0], dim: 0.35 },
-        contact: { pos: [1.7, -6.3, 10], look: [1.9, -6.2, 0], dim: 0.7 },
+        contact: hasEmblem ? { pos: [0, -13.2, 11], look: [0, -13.6, 0], dim: 0.9 } : { pos: [1.7, -6.3, 10], look: [1.9, -6.2, 0], dim: 0.7 },
       },
       mobileKeys: {
         hero: { pos: [0, 1.6, 12], look: [0, 1.4, 0], dim: 0.6 },
         results: { pos: [0, -6, 10], look: [0, -7.6, 0] },
-        contact: { pos: [0, -6.2, 10], look: [0, -7.4, 0], dim: 0.6 },
+        contact: hasEmblem ? { pos: [0, -13.2, 11], look: [0, -13.6, 0], dim: 0.9 } : { pos: [0, -6.2, 10], look: [0, -7.4, 0], dim: 0.6 },
       },
     };
   }
@@ -734,13 +777,22 @@
     scene.add(floor);
     cloudLayers.push({ mesh: floor, speed: 0.06, span: 52 });
     scene.add(glow(30, [0, -7, -14], 0x2f5bff, 0.28));
+    const badgeStage = document.querySelector('[data-anchor="team-badge"]');
+    if (badgeStage && available.has('studio-badge')) getModel('studio-badge').then(m => {
+      if (!m) return;
+      const rig = pinTo(badgeStage, { fill: 0.9 });
+      rig.add(m);
+      presenter(rig, { sway: 0.7, tilt: 0.3 });
+      const key = new T.PointLight(0x5b8cff, 1.4, 30, 1.6);
+      camera.add(key); key.position.set(-2, 2, 2); scene.add(camera);
+    });
     return { bloom: [0.26, 0.35, 0.86], keys: { hero: { pos: [0, 0, 12], look: [0, 0.2, 0] }, members: { pos: [0, -3.5, 12], look: [0, -4.5, 0], dim: 0.7 } } };
   }
 
   function buildLost() {
     scene.fog = new T.FogExp2(0x050506, 0.03);
     scene.add(stars(LOW ? 900 : 1600, [-30, 30, -14, 14, -40, 4], 0.1));
-    const X = brandX(2.4, 4);
+    const X = brandMark(1.75, 4);
     sideAnchor(X, [3.2, 0.2, -1], [0, 2.2, -2]);
     scene.add(X);
     spinners.push(() => { X.rotation.y = Math.sin(clock * 0.4) * 0.3 + pointer.sx * 0.3; });

@@ -49,13 +49,13 @@ function footer() {
 
 // Finalized GLB models (see assets/models/README.md). Only files that exist are announced to
 // world.js, and a page only reserves room for a model it can actually show.
-const MODELS = ['uad-sphere', 'fuji-xh2s', 'tlm-103', 'prxdigy-x-final'];
+const MODELS = ['uad-sphere', 'fuji-xh2s', 'tlm-103', 'prxdigy-x-final', 'studio-badge', 'creative-emblem', 'prxdigy-logo-3d'];
 const hasModel = name => existsSync(`assets/models/${name}.glb`);
 const modelList = MODELS.filter(hasModel).join(',');
 
 // The 3D world: one fixed canvas behind the page, plus the script chain world.js needs.
 const V = `${ROOT}assets/vendor/`;
-const worldScripts = ['three/three.min.js', 'three/GLTFLoader.js', 'three/RoomEnvironment.js', 'three/objects/Reflector.js',
+const worldScripts = ['three/three.min.js', 'three/GLTFLoader.js', 'three/meshopt_decoder.js', 'three/RoomEnvironment.js', 'three/objects/Reflector.js',
   'three/shaders/CopyShader.js', 'three/shaders/LuminosityShader.js', 'three/shaders/LuminosityHighPassShader.js',
   'three/postprocessing/EffectComposer.js', 'three/postprocessing/RenderPass.js', 'three/postprocessing/ShaderPass.js', 'three/postprocessing/UnrealBloomPass.js',
   'lenis/lenis.min.js'].map(src => `<script src="${V}${src}" defer></script>`).join('');
@@ -72,7 +72,7 @@ function page({ title, description, path, og, active, body, className = '', worl
   <link rel="icon" href="${ROOT}assets/favicon.ico"><link rel="apple-touch-icon" href="${ROOT}assets/apple-touch-icon.png">
   <link rel="preload" href="${ROOT}assets/fonts/bebas-neue-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="${ROOT}public.css">
-  ${worldScripts}<script src="${ROOT}world.js" defer></script><script src="${ROOT}public.js" defer></script>
+  ${PREVIEW ? '<script>window.PRX_PREVIEW = true;</script>' : ''}${worldScripts}<script src="${ROOT}world.js" defer></script><script src="${ROOT}public.js" defer></script>
 ${schema ? `  <script type="application/ld+json">${schema}</script>` : ''}
 </head><body class="${className}" data-world="${world}" data-assets="${ROOT}assets/" data-models="${modelList}">
   <div class="world-backdrop" aria-hidden="true"></div><canvas class="world-canvas" aria-hidden="true"></canvas><div class="world-grain" aria-hidden="true"></div>
@@ -191,7 +191,7 @@ const creative = page({
   <section class="beat section creative-services" data-beat="capabilities"><div class="wrap"><div class="section-heading">${eyebrow('02 / What we do')}<h2 data-reveal="glitch">More than content.<br><em>We build momentum.</em></h2><p data-reveal>One connected team across strategy, creation, and the release.</p></div><div class="capability-list">${creativeCapabilities.map(([name, description], i) => `<div class="capability" data-reveal><span>${String(i + 1).padStart(2, '0')}</span><h3>${name}</h3><p>${description}</p></div>`).join('')}</div></div></section>
   <section class="beat section selected-work" data-beat="work"><div class="wrap"><div class="section-heading">${eyebrow('03 / In practice')}<h2 data-reveal="glitch">Portfolio picks</h2><p data-reveal>A glimpse into our world.</p></div><div class="work-grid"><figure class="work-item" data-reveal><div class="work-image work-glass">${img('creative-pill-chrome.webp', 'Chrome and glass PCP capsule with the ruby X, from the Creative Projects identity', 1254, 754)}</div><figcaption><span>01 / Artist rollout</span><h3>A visual world built around the release.</h3><p>Performance content, production, and rollout assets.</p></figcaption></figure><figure class="work-item" data-reveal><div class="work-image work-image-invert"><video id="glitch-video" src="${A}wordmark-glitch-reveal.mp4" poster="${A}wordmark-glitch-reveal-poster.jpg" autoplay muted loop playsinline preload="none" aria-label="PRXDIGY wordmark glitch reveal"></video>${pauseButton('glitch-video')}</div><figcaption><span>02 / Visual production</span><h3>Make the moment feel like the music.</h3><p>Concept, shoot direction, editing, and social-ready content.</p></figcaption></figure></div><figure class="work-wide work-glass" data-reveal>${img('creative-pill-shatter.webp', 'The PCP capsule shattering on a wet black floor', 1672, 941, 'loading="lazy" decoding="async"', '100vw')}</figure></div></section>
   <section class="beat section process-section" data-beat="process"><div class="wrap process-grid"><div class="process-heading">${eyebrow('04 / How it connects')}<h2 data-reveal="glitch">The full<br><em>package.</em></h2><p data-reveal>We can help shape the idea, define the direction, create the content, release the work, and measure what happens next.</p></div><div><ol class="process-list">${processSteps.map((step, i) => `<li data-reveal><span>${String(i + 1).padStart(2, '0')}</span>${step}</li>`).join('')}</ol><div class="support-list" data-reveal><p>Connected capabilities</p><ul>${support.map(item => `<li>${item}</li>`).join('')}</ul></div><p class="process-close" data-reveal>From idea to execution, everything is done here.</p></div></div></section>
-  <section class="beat section contact-section creative-contact" id="creative-contact" data-beat="contact"><div class="wrap contact-grid"><div class="panel">${eyebrow('05 / Make the next move')}<h2 data-reveal="glitch">Ready for your<br>new <em>team?</em></h2><p class="contact-lede" data-reveal>Tell us what you're building, and we'll map the next move.</p><a class="creative-start-link" href="#creative-contact-options">Start a Creative Project ${down}</a>${contactActions('Choose Instagram or text, and we’ll help map the next step.', 'creative-contact-options')}</div></div></section>`
+  <section class="beat section contact-section creative-contact" id="creative-contact" data-beat="contact"><div class="wrap contact-grid"><div class="panel">${eyebrow('05 / Make the next move')}<h2 data-reveal="glitch">Ready for your<br>new <em>team?</em></h2><p class="contact-lede" data-reveal>Tell us what you're building, and we'll map the next move.</p><a class="creative-start-link" href="#creative-contact-options">Start a Creative Project ${down}</a>${contactActions('Choose Instagram or text, and we’ll help map the next step.', 'creative-contact-options')}</div>${hasModel('creative-emblem') ? '<div class="model-stage emblem-stage" data-anchor="creative-emblem" aria-hidden="true"></div>' : ''}</div></section>`
 });
 
 // ---------- Brooklyn ----------
@@ -220,7 +220,7 @@ const team = page({
   title: 'The Team — PRXDIGY',
   description: 'The people behind PRXDIGY studios and Creative Projects.',
   path: '/team/', og: 'og-home.jpg', active: '/team/', className: 'page-team', world: 'team',
-  body: `<section class="beat team-hero" data-beat="hero"><div class="wrap"><p class="eyebrow"><span class="eyebrow-line"></span>PRXDIGY / The Team</p><h1 class="glitch-title">The Team</h1></div></section>
+  body: `<section class="beat team-hero" data-beat="hero"><div class="wrap team-hero-grid"><div><p class="eyebrow"><span class="eyebrow-line"></span>PRXDIGY / The Team</p><h1 class="glitch-title">The Team</h1></div>${hasModel('studio-badge') ? '<div class="model-stage team-badge-stage" data-anchor="team-badge" aria-hidden="true"></div>' : ''}</div></section>
   <section class="beat section team-section" data-beat="members"><div class="wrap"><ul class="team-grid" role="list">${teamSlots.map(n => `<li class="team-card" data-reveal style="--i:${n - 1}"><article aria-label="Team member ${n} (profile pending)"><div class="team-portrait"><span class="team-portrait-index" aria-hidden="true">0${n}</span><span class="team-portrait-label">Portrait — pending</span></div><div class="team-copy"><h2 class="team-name">[ Name ]</h2><p class="team-role">[ Role / title ]</p><p class="team-bio">[ Short biography — pending approved copy ]</p><div class="team-links"><span class="team-link-slot">[ Social link ]</span><span class="team-link-slot">[ Contact link ]</span></div></div></article></li>`).join('')}</ul></div></section>`
 });
 

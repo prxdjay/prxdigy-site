@@ -30,14 +30,20 @@ The Long Island application keeps the existing Google Apps Script endpoint and s
 
 `world.js` loads finalized GLB models only when the file exists; `build.mjs` checks `assets/models/` and tells the page which ones are there, so a missing model never leaves an empty frame or a 404.
 
-| File | Where it appears |
-| --- | --- |
-| `assets/models/uad-sphere.glb` | Long Island, beside the services list |
-| `assets/models/fuji-xh2s.glb` | Long Island, beside the services list |
-| `assets/models/tlm-103.glb` | Brooklyn, its own "On the mic" section |
-| `assets/models/prxdigy-x-final.glb` | Replaces the code-built X everywhere (Long Island stamp, home monument, inside the Creative Projects pill) |
+| File | Source (Meshy export) | Where it appears |
+| --- | --- | --- |
+| `prxdigy-logo-3d.glb` | Chrome Prodigy Ruby | Home hero wordmark (`?wm=classic` shows the older `prxdigy-wordmark.glb`) |
+| `prxdigy-x-final.glb` | Single Point Ruby Star | The X in its chrome ring: home monument, Long Island stamp, inside the Creative Projects pill, 404 |
+| `uad-sphere.glb` | Studio Microphone | Long Island, beside the services list |
+| `fuji-xh2s.glb` | Fujifilm Mirrorless | Long Island, beside the services list |
+| `tlm-103.glb` | Neumann Studio Microphone | Brooklyn, "On the mic" section |
+| `studio-badge.glb` | Circular Badge Emblem | The Team, beside the heading |
+| `creative-emblem.glb` | Prodigy Emblem Full Ring | Creative Projects, closing section |
+| `pill-capsule.glb` | Clean Chrome Capsule | Kept for reference; the page uses the code-built glass pill so the X can sit inside real glass |
 
-Models are pinned to page elements (`data-anchor`), so they sit beside the copy at every screen size. Compress before committing: textures at 1024–2048px JPEG, geometry simplified, target 1–5MB per file.
+The source exports were 12–30MB and up to 3.7M triangles each. They were compressed with gltf-transform (meshopt geometry, WebP textures at 1024–2048px, simplified to 28k–166k triangles), 14MB total. `assets/vendor/three/meshopt_decoder.js` decodes them. The uncompressed originals stay in the Drive folder, not in this repo.
+
+Textured models are lit with a neutral room reflection (`authoredLight` in `world.js`); the code-built chrome and ruby keep the darker strip-light studio. Models are pinned to page elements (`data-anchor`), so they sit beside the copy at every screen size.
 
 ## Media provenance
 
