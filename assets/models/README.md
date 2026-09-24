@@ -59,3 +59,18 @@ segments in the source geometry — real remodeling work, not a render setting, 
 this environment has tooling for (no Blender here). Treat the environment-lit render as the
 realistic real-time target; flag the remaining facet gap to the user rather than claiming a
 geometry fix that wasn't done.
+
+**`prxdigy-x.glb` specifically has a real geometry defect, confirmed by user feedback and then by
+inspecting the mesh.** The standalone X's silhouette has stray notches and jagged, stepped edges —
+not a style choice. Checked the accessor data: 1,114 vertices for a single 4-pointed X shape, where
+a clean vector X needs on the order of 50-100. That vertex count is the signature of a shape
+extruded from a jagged/anti-aliased raster trace rather than a clean path — probably auto-traced
+from a PNG at some point in the pipeline.
+
+**Fix: don't use `prxdigy-x.glb` for the standalone X moment.** Build it directly in Three.js
+instead — a hand-authored 8-point star `THREE.Shape` (tips at 45°/135°/225°/315°, waist points
+between), extruded with `bevelSegments: 6` and the same chrome-red PBR values as the wordmark's
+enamel material. Tested and confirmed clean: symmetric, sharp tips, proper bevels, no stray
+geometry. Full source in the build prompt's asset section. `prxdigy-wordmark.glb` does not have
+this problem — its geometry is fine, only its lighting needed the environment-map fix above; keep
+using the real GLB for the wordmark.
