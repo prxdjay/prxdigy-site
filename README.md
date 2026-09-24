@@ -39,6 +39,10 @@ All files below are optimized, metadata-free derivatives. The existing public `a
 | `wordmark-3d-poster.png`, `x-3d-poster.png` | Static fallback renders of `assets/models/*.glb`, recovered from an earlier local build attempt |
 | `prxdigy-x-original.png` | Current flat/vector red X asset (distinct from the 3D chrome X model) |
 | `lifted/studio-*.webp` | Brighter alternate exposure treatments of the same studio photography — candidates for use against a very dark 3D scene where the standard exposure would go muddy |
+| `brooklyn-x-installation.webp` | Real Brooklyn location photo — neon violet X-shaped light installation on the ceiling |
+| `brooklyn-studio-wide.webp`, `brooklyn-studio-wide-alt.webp` | Real Brooklyn location photos — wide shots of the work room under the X installation |
+| `brooklyn-desk-detail.webp`, `brooklyn-gear-detail.webp` | Real Brooklyn location photos — monitor/desk setup and studio gear detail |
+| `cloud-transition.mp4`, `cloud-transition-poster.jpg` | Compressed from a supplied reference clip of a violet fog/cloud wipe with a light bloom passing through — reference for the descent-through-clouds scroll beat |
 
 The two Creative Projects work images ship with generic filenames and no artist or track metadata. No source `.mov` is served to browsers.
 
