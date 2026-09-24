@@ -420,8 +420,7 @@
       wordmark.add(inner);
       wordmark.userData.inner = inner;
       fitWordmark();
-      wordmark.userData.born = clock;
-      body.classList.add('world-wordmark');
+      wordmark.userData.state = 'warming';
     }).catch(() => body.classList.add('no-wordmark'));
     else loadGLB(ASSETS + 'models/prxdigy-wordmark.glb').then(obj => {
       obj.rotation.x = Math.PI / 2;
@@ -443,24 +442,47 @@
       wordmark.add(inner);
       wordmark.userData.inner = inner;
       fitWordmark();
-      wordmark.userData.born = clock;
-      body.classList.add('world-wordmark');
+      wordmark.userData.state = 'warming';
     }).catch(() => body.classList.add('no-wordmark'));
 
+    const markTarget = () => Math.min(visibleAt(13).w * (portrait() ? 0.86 : 0.6), 9.2);
     function fitWordmark() {
       const inner = wordmark.userData.inner;
       if (!inner) return;
-      const vis = visibleAt(13);
-      const target = Math.min(vis.w * (portrait() ? 0.86 : 0.6), 9.2);
-      inner.scale.setScalar(target / inner.userData.width);
+      inner.scale.setScalar(markTarget() / inner.userData.width);
+    }
+
+    // Intro: the flat logo holds the exact spot the 3D logo will occupy. Once the model has
+    // loaded and rendered a few frames (textures uploaded, shaders compiled), the flat logo
+    // glitches out while the 3D one resolves from coarse pixels to sharp.
+    const heroMark = document.querySelector('.hero-mark');
+    const heroSection = heroMark && heroMark.closest('section');
+    const markPos = new T.Vector3();
+    function placeFlatMark() {
+      if (!heroMark) return;
+      wordmark.getWorldPosition(markPos);
+      const dist = markPos.distanceTo(camera.position);
+      markPos.project(camera);
+      const top = heroSection.getBoundingClientRect().top;
+      heroMark.style.left = ((markPos.x + 1) / 2 * innerWidth) + 'px';
+      heroMark.style.top = ((1 - markPos.y) / 2 * innerHeight - top) + 'px';
+      const w = markTarget() / visibleAt(dist).w * innerWidth;
+      heroMark.style.width = w + 'px';
+      const cx = (markPos.x + 1) / 2, cy = (markPos.y + 1) / 2, hw = (w / innerWidth) * 0.62, hh = (w / 4.2 / innerHeight) * 1.1;
+      reveal.box = [cx - hw, cy - hh, cx + hw, cy + hh];
     }
 
     // violet cloud sea + light bloom passing through
-    const n = LOW ? 70 : 130;
-    const clouds1 = cloudField({ count: n, center: [0, -10, -6], spread: [46, 7, 26], size: [5, 11], tint: 0x6f5cff, opacity: 0.26 });
-    const clouds2 = cloudField({ count: n, center: [0, -13, -2], spread: [46, 6, 22], size: [5, 12], tint: 0x9d8cff, opacity: 0.22, tex: cloudTexB });
-    const clouds3 = cloudField({ count: Math.round(n * 0.6), center: [0, -7.5, -10], spread: [60, 4, 20], size: [6, 13], tint: 0x5a46e0, opacity: 0.18 });
-    [clouds1, clouds2, clouds3].forEach((m, i) => { scene.add(m); cloudLayers.push({ mesh: m, speed: [0.14, -0.1, 0.07][i], span: 46 }); });
+    const n = LOW ? 60 : 110, big = LOW ? 1.6 : 2;
+    const sz = (a, b) => [a * big, b * big];
+    const homeClouds = [
+      cloudField({ count: n, center: [0, -10, -6], spread: [60, 8, 28], size: sz(5, 11), tint: 0x6f5cff, opacity: 0.22 }),
+      cloudField({ count: n, center: [0, -13, -3], spread: [60, 7, 24], size: sz(5, 12), tint: 0x9d8cff, opacity: 0.19, tex: cloudTexB }),
+      cloudField({ count: Math.round(n * 0.6), center: [0, -7.5, -12], spread: [72, 5, 22], size: sz(6, 13), tint: 0x5a46e0, opacity: 0.16 }),
+      cloudField({ count: Math.round(n * 0.8), center: [0, -16.5, -6], spread: [64, 6, 26], size: sz(5, 12), tint: 0x7a66ff, opacity: 0.18, tex: cloudTexB }),
+      cloudField({ count: Math.round(n * 0.7), center: [0, -19.5, -10], spread: [70, 5, 26], size: sz(6, 13), tint: 0x5a46e0, opacity: 0.15 }),
+    ];
+    homeClouds.forEach((m, i) => { scene.add(m); cloudLayers.push({ mesh: m, speed: [0.14, -0.1, 0.07, -0.08, 0.06][i], span: 60 }); });
     const bloomCore = glow(30, [3, -9, -16], 0xe6dcff, 0.5);
     scene.add(bloomCore);
 
@@ -503,13 +525,24 @@
 
     spinners.push(f => {
       const inner = wordmark.userData.inner;
+      const ud = wordmark.userData;
+      if (ud.state !== 'shown') placeFlatMark();
       if (inner) {
         inner.rotation.y = Math.sin(clock * 0.3) * 0.07 + pointer.sx * 0.14;
         inner.rotation.x = -pointer.sy * 0.08 - Math.min(f, 1.2) * 0.35;
-        const born = Math.min(1, (clock - wordmark.userData.born) / 1.4);
-        const e = 1 - Math.pow(1 - born, 3);
-        wordmark.position.y = 0.95 - (1 - e) * 0.6;
-        inner.visible = true;
+        let e = 1;
+        if (ud.state === 'warming') {
+          e = 0.001; // drawn but invisible, so every texture is on the GPU before the reveal
+          ud.warm = (ud.warm || 0) + 1;
+          if (ud.warm > 4) { ud.state = reduce ? 'shown' : 'revealing'; ud.start = clock; body.classList.add('world-wordmark'); }
+        } else if (ud.state === 'revealing') {
+          const t = Math.min(1, (clock - ud.start) / 1.35);
+          const k = 1 - Math.pow(1 - t, 3);
+          reveal.pixel = 1 + 46 * (1 - k);
+          reveal.shift = (1 - k) * 0.006;
+          e = Math.min(1, t * 6);
+          if (t >= 1) { ud.state = 'shown'; reveal.pixel = 0; reveal.shift = 0; }
+        }
         inner.traverse(o => { if (o.material) { o.material.transparent = e < 1; o.material.opacity = e; } });
       }
       mon.rotation.y = Math.sin(clock * 0.25) * 0.1 + (f - 2) * 0.22;
@@ -750,9 +783,9 @@
     if (hasMic) {
       getModel('tlm-103').then(m => {
         if (!m) return;
-        const rig = pinTo(micStage, { fill: 0.85 });
+        const rig = pinTo(micStage, { fill: 0.9, depth: 8 });
         rig.add(m);
-        presenter(rig, { sway: 0.55, tilt: 0.2 });
+        presenter(rig, { sway: 0.55, tilt: 0.2, bob: 0.05, drift: 0.03, roll: 0.08 });
       });
       const rim = new T.PointLight(0x4d7cff, 1.6, 30, 1.6);
       camera.add(rim);
@@ -763,13 +796,13 @@
       bloom: [0.34, 0.42, 0.78],
       keys: {
         hero: { pos: [0, 0, 11], look: [0, 0.3, 0] },
-        installation: { pos: [1.4, 0, 7.5], look: [2.3, 0.1, -2.5], dim: 0.45 },
+        installation: { pos: [1.4, 0, 7.5], look: [2.3, 0.1, -2.5], dim: hasMic ? 0.8 : 0.45 },
         room: { pos: [0.6, -4, 11], look: [0.8, -3, 0], dim: 0.35 },
-        detail: { pos: [0.4, -6.5, 11], look: [0.6, -5.5, 0], dim: hasMic ? 0.95 : 0.3 },
+        services: { pos: [0.4, -6.5, 11], look: [0.6, -5.5, 0], dim: 0.35 },
         links: { pos: [0, -3, 12], look: [0, -2, 0], dim: 0.55 },
       },
       mobileKeys: {
-        installation: { pos: [0, 1, 8], look: [0, 1.6, -4], dim: 0.4 },
+        installation: { pos: [0, 1, 8], look: [0, 1.6, -4], dim: hasMic ? 0.75 : 0.4 },
       },
     };
   }
@@ -805,6 +838,7 @@
   }
 
   const onResize = [];
+  const reveal = { pixel: 0, shift: 0, box: [0, 0, 1, 1] }; // intro pixel-resolve (uv box), driven by the home wordmark
   let clock = 0;
   const pointer = { x: 0, y: 0, sx: 0, sy: 0 };
   const builders = { home: buildHome, 'long-island': buildLongIsland, creative: buildCreative, brooklyn: buildBrooklyn, team: buildTeam, lost: buildLost };
@@ -816,15 +850,17 @@
   const bloom = new T.UnrealBloomPass(new T.Vector2(innerWidth, innerHeight), ...world.bloom);
   composer.addPass(bloom);
   const finish = new T.ShaderPass({
-    uniforms: { tDiffuse: { value: null }, uShift: { value: 0 }, uTime: { value: 0 } },
+    uniforms: { tDiffuse: { value: null }, uShift: { value: 0 }, uTime: { value: 0 }, uPixel: { value: 0 }, uRes: { value: new T.Vector2(1, 1) }, uBox: { value: new T.Vector4(0, 0, 1, 1) } },
     vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }',
-    fragmentShader: `uniform sampler2D tDiffuse; uniform float uShift; uniform float uTime; varying vec2 vUv;
+    fragmentShader: `uniform sampler2D tDiffuse; uniform float uShift; uniform float uTime; uniform float uPixel; uniform vec2 uRes; uniform vec4 uBox; varying vec2 vUv;
       void main(){
-        vec2 d = vUv - 0.5;
+        vec2 uv = vUv;
+        if (uPixel > 1.0 && uv.x > uBox.x && uv.y > uBox.y && uv.x < uBox.z && uv.y < uBox.w) { vec2 cells = uRes / uPixel; uv = (floor(uv * cells) + 0.5) / cells; }
+        vec2 d = uv - 0.5;
         vec2 o = vec2(uShift, uShift * 0.25) * (0.35 + length(d));
-        vec4 c = texture2D(tDiffuse, vUv);
-        c.r = texture2D(tDiffuse, vUv + o).r;
-        c.b = texture2D(tDiffuse, vUv - o).b;
+        vec4 c = texture2D(tDiffuse, uv);
+        c.r = texture2D(tDiffuse, uv + o).r;
+        c.b = texture2D(tDiffuse, uv - o).b;
         float v = smoothstep(0.92, 0.3, length(d * vec2(1.0, 0.85)));
         c.rgb *= mix(0.62, 1.0, v);
         float n = fract(sin(dot(vUv * 1000.0 + uTime, vec2(12.9898, 78.233))) * 43758.5453);
@@ -907,6 +943,7 @@
     camera.updateProjectionMatrix();
     renderer.setSize(innerWidth, innerHeight, false);
     composer.setSize(innerWidth, innerHeight);
+    renderer.getDrawingBufferSize(finish.uniforms.uRes.value);
     const scale = renderer.getPixelRatio() * innerHeight / 2 / Math.tan(T.MathUtils.degToRad(camera.fov / 2));
     scene.traverse(o => { if (o.userData.star || (o.material && o.material.uniforms && o.material.uniforms.uScale)) o.material.uniforms.uScale.value = scale; });
     keys = keysFor();
@@ -934,7 +971,9 @@
     const v = (scrollY - lastScroll) / dt;
     lastScroll = scrollY;
     velocity += (v - velocity) * (1 - Math.exp(-dt * 10));
-    finish.uniforms.uShift.value = reduce ? 0 : Math.max(-0.009, Math.min(0.009, velocity * 0.0000075));
+    finish.uniforms.uShift.value = reduce ? 0 : Math.max(-0.009, Math.min(0.009, velocity * 0.0000075)) + reveal.shift;
+    finish.uniforms.uPixel.value = reveal.pixel * renderer.getPixelRatio();
+    finish.uniforms.uBox.value.set(...reveal.box);
     finish.uniforms.uTime.value = clock;
     cloudLayers.forEach(l => { l.mesh.position.x = Math.sin(clock * l.speed * 0.1) * l.span * 0.12; });
     scene.traverse(o => { if (o.userData.star) o.material.uniforms.uTime.value = clock; });

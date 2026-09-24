@@ -188,6 +188,19 @@ document.addEventListener('click', event => {
 });
 window.addEventListener('pageshow', () => document.body.classList.remove('is-leaving'));
 
+// Blended videos stay hidden until real frames are playing, so no black box flashes first.
+document.querySelectorAll('video.reveal-on-play').forEach(video => {
+  const show = () => video.classList.add('is-playing');
+  // Browsers that can't play the file get the still frame instead of an empty spot.
+  const fail = () => { if (!video.classList.contains('is-playing')) video.parentElement.classList.add('video-failed'); };
+  if (!video.canPlayType('video/mp4; codecs="avc1.42E01E"')) fail();
+  video.addEventListener('error', fail);
+  setTimeout(fail, 6000);
+  video.addEventListener('playing', show);
+  if (motionReduced.matches) video.addEventListener('loadeddata', show);
+  if (video.readyState >= 3 && !video.paused) show();
+});
+
 // Pause/play for the looping videos; reduced-motion visitors start paused.
 document.querySelectorAll('.media-toggle').forEach(button => {
   const video = document.getElementById(button.dataset.media);
