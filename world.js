@@ -473,16 +473,11 @@
     }
 
     // violet cloud sea + light bloom passing through
-    const n = LOW ? 60 : 110, big = LOW ? 1.6 : 2;
-    const sz = (a, b) => [a * big, b * big];
-    const homeClouds = [
-      cloudField({ count: n, center: [0, -10, -6], spread: [60, 8, 28], size: sz(5, 11), tint: 0x6f5cff, opacity: 0.22 }),
-      cloudField({ count: n, center: [0, -13, -3], spread: [60, 7, 24], size: sz(5, 12), tint: 0x9d8cff, opacity: 0.19, tex: cloudTexB }),
-      cloudField({ count: Math.round(n * 0.6), center: [0, -7.5, -12], spread: [72, 5, 22], size: sz(6, 13), tint: 0x5a46e0, opacity: 0.16 }),
-      cloudField({ count: Math.round(n * 0.8), center: [0, -16.5, -6], spread: [64, 6, 26], size: sz(5, 12), tint: 0x7a66ff, opacity: 0.18, tex: cloudTexB }),
-      cloudField({ count: Math.round(n * 0.7), center: [0, -19.5, -10], spread: [70, 5, 26], size: sz(6, 13), tint: 0x5a46e0, opacity: 0.15 }),
-    ];
-    homeClouds.forEach((m, i) => { scene.add(m); cloudLayers.push({ mesh: m, speed: [0.14, -0.1, 0.07, -0.08, 0.06][i], span: 60 }); });
+    const n = LOW ? 70 : 130;
+    const clouds1 = cloudField({ count: n, center: [0, -10, -6], spread: [46, 7, 26], size: [5, 11], tint: 0x6f5cff, opacity: 0.26 });
+    const clouds2 = cloudField({ count: n, center: [0, -13, -2], spread: [46, 6, 22], size: [5, 12], tint: 0x9d8cff, opacity: 0.22, tex: cloudTexB });
+    const clouds3 = cloudField({ count: Math.round(n * 0.6), center: [0, -7.5, -10], spread: [60, 4, 20], size: [6, 13], tint: 0x5a46e0, opacity: 0.18 });
+    [clouds1, clouds2, clouds3].forEach((m, i) => { scene.add(m); cloudLayers.push({ mesh: m, speed: [0.14, -0.1, 0.07][i], span: 46 }); });
     const bloomCore = glow(30, [3, -9, -16], 0xe6dcff, 0.5);
     scene.add(bloomCore);
 

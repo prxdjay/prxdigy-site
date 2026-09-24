@@ -17,7 +17,7 @@ export const site = {
     { label: 'The Team', href: '/team/' },
   ],
   // Business details shown in the footer and legal pages.
-  business: { name: 'PRXDIGY', location: 'Long Island, NY', email: 'prxd.jay@gmail.com' },
+  business: { name: 'PRXDIGY', location: 'Long Island, NY', email: 'prxdigystudio@gmail.com' },
   legal: [
     { label: 'Privacy Policy', href: '/privacy.html' },
     { label: 'Terms & Conditions', href: '/terms.html' },
