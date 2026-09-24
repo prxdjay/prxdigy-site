@@ -48,6 +48,7 @@ All files below are optimized, metadata-free derivatives. The existing public `a
 | `studio-stamp-wide.webp` | Widescreen crop of the circular PRXDIGY STUDIO stamp (existing `assets/logo.png`/`studio-logo.webp` is the square crop) |
 | `brooklyn-x-daylight.webp`, `brooklyn-hallway.webp`, `brooklyn-booth-window.webp`, `brooklyn-desk-wide.webp` | More real Brooklyn location photos — the X installation under work lighting (same installation as `brooklyn-x-installation.webp`, different lighting condition), the entry hallway, the booth viewed through the control-room window, a wider desk shot. One monitor shows "nothing matters nobody cares" — a real detail, not staged for the site |
 | `creative-projects-ident-alt-ref.jpg` | Reference still only, not a clean source. Pulled from a screen recording of an alternate/cleaner PCP end-card ("PRXDIGY \| CREATIVE PROJECTS" lockup) — quality is capped by re-recording a phone screen. If this cut should replace the current ident, send the raw video file, not a screen recording, so it can be compressed from source |
+| `wordmark-sketch-reveal.mp4`, `wordmark-sketch-poster.jpg` | A fourth brand mark exploration: hand-drawn/scribble "PRXDIGY STUDIO" in a wobbly sketched oval, small hand-drawn red X over "STUDIO," draws itself in then holds. Real source file this time (not a screen recording). Not approved as canon |
 
 The two Creative Projects work images ship with generic filenames and no artist or track metadata. No source `.mov` is served to browsers.
 
