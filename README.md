@@ -32,8 +32,14 @@ All files below are optimized, metadata-free derivatives. The existing public `a
 | `production-wide.webp` | Still from an approved Creative Projects reel; source time 3 s |
 | `production-performance.webp` | Still from an approved Creative Projects intro reel; source time 5 s |
 | `og-home.jpg`, `og-long-island.jpg`, `og-creative.jpg`, `og-brooklyn.jpg` | Social preview derivatives of the approved media and logos above |
+| `studio-keyboard.webp` | Existing `assets/star-ceiling.png` (engineer's hand on a red-lit keyboard) |
+| `studio-desk-detail.webp` | Existing `assets/environment.png` (astronaut figurine + ashtray, red-lit desk) |
+| `studio-ambient.webp` | Existing `assets/couch-red.png` (blurred bokeh, mic silhouette against studio lights) |
+| `creative-projects-ident.mp4`, `creative-projects-poster.jpg` | Compressed from the supplied PCP brand reveal video (source `.mov`, not served to browsers) |
 
 The two Creative Projects work images ship with generic filenames and no artist or track metadata. No source `.mov` is served to browsers.
+
+`assets/hero-bg.png` is a byte-identical duplicate of `assets/neon-light.png` — not a distinct asset, not used.
 
 ## Deployment
 
