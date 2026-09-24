@@ -125,3 +125,32 @@ if (form) {
     errorSummary.hidden = true;
   }));
 }
+
+// Header state, scroll reveals, and the scanline wipe between pages.
+const setScrolled = () => document.body.classList.toggle('is-scrolled', window.scrollY > 40);
+setScrolled();
+window.addEventListener('scroll', setScrolled, { passive: true });
+
+const revealables = document.querySelectorAll('[data-reveal]');
+if (motionReduced.matches || !('IntersectionObserver' in window)) {
+  revealables.forEach(el => el.classList.add('is-in'));
+} else {
+  const revealer = new IntersectionObserver(entries => entries.forEach(entry => {
+    if (!entry.isIntersecting) return;
+    entry.target.classList.add('is-in');
+    revealer.unobserve(entry.target);
+  }), { rootMargin: '0px 0px -12% 0px' });
+  revealables.forEach(el => revealer.observe(el));
+}
+
+document.addEventListener('click', event => {
+  const link = event.target.closest('a[href]');
+  if (!link || motionReduced.matches || event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || link.target) return;
+  const url = new URL(link.href, location.href);
+  if (url.origin !== location.origin || url.protocol.indexOf('http') !== 0) return;
+  if (url.pathname === location.pathname && url.hash) return;
+  event.preventDefault();
+  document.body.classList.add('is-leaving');
+  setTimeout(() => { location.href = url.href; }, 420);
+});
+window.addEventListener('pageshow', () => document.body.classList.remove('is-leaving'));

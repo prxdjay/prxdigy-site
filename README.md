@@ -6,6 +6,12 @@ Static GitHub Pages site for `prxdigystudio.com`. The public pages live at `/`, 
 
 Run `node build.mjs` from the repository root. The script writes the public HTML, `404.html`, `sitemap.xml`, and `robots.txt`. It also applies the shared public navigation and current contact number to the existing legal pages while preserving their policy text.
 
+`node build.mjs --preview <dir>` writes a flat copy of the four pages with relative links (`index.html`, `long-island.html`, ...) for sharing a preview outside GitHub Pages.
+
+## 3D world
+
+Every public page has one fixed WebGL canvas behind the HTML, driven by `world.js` (see `WORLD.md`). Sections marked `data-beat` are camera keyframes; scrolling moves the camera between them. Text, links, and the booking form stay real HTML. Three.js r134, its post-processing passes, and Lenis are self-hosted under `assets/vendor/`; fonts are self-hosted under `assets/fonts/`. Without WebGL the page falls back to the 2D wordmark and a CSS starfield; with reduced motion the camera snaps between beats and smooth scroll is off.
+
 There are no production npm dependencies. GitHub Pages serves the generated files directly from the repository root. `CNAME` and the existing hosting provider stay in place.
 
 ## Editing public content
@@ -13,9 +19,10 @@ There are no production npm dependencies. GitHub Pages serves the generated file
 - `site-config.mjs` owns the destination order, location statuses, Instagram, text number, and 2026 results.
 - `build.mjs` owns the four page bodies, shared header/footer, titles, and metadata.
 - `public.css` owns the public design and responsive behavior.
-- `public.js` owns the mobile menu, one-time results animation, and Long Island application submission.
+- `public.js` owns the mobile menu, one-time results animation, Long Island application submission, scroll reveals, and the page-change wipe.
+- `world.js` owns the 3D scenes (one per page) and scroll-driven camera.
 - `assets/public/` contains optimized web media. Originals remain untouched.
-- Brooklyn photography is intentionally unset in `site-config.mjs` until authentic location images and details are supplied.
+- Brooklyn uses real location photos; the address stays unpublished until supplied.
 
 The Long Island application keeps the existing Google Apps Script endpoint and submission payload. The browser sends its POST with `no-cors`, so it can confirm that the request was sent by the browser but cannot inspect the endpoint's response. The existing SMS consent, policy links, field names, and success/failure actions remain. Do not replace the endpoint without verifying the new backend.
 
@@ -29,9 +36,10 @@ All files below are optimized, metadata-free derivatives. The existing public `a
 | `creative-logo.webp` | Approved Creative Projects full logo PNG |
 | `studio-logo.webp` | Existing `assets/logo.png` |
 | `studio-mic.webp`, `studio-sign.webp`, `studio-keys.webp`, `studio-couch.webp`, `studio-guitar.webp`, `studio-ceiling.webp` | Existing `assets/mic-closeup.png`, `vocal-booth.png`, `keys-session.png`, `red-room.png`, `logo-wall.png`, `neon-light.png` respectively |
-| `production-wide.webp` | Still from an approved Creative Projects reel; source time 3 s |
-| `production-performance.webp` | Still from an approved Creative Projects intro reel; source time 5 s |
-| `og-home.jpg`, `og-long-island.jpg`, `og-creative.jpg`, `og-brooklyn.jpg` | Social preview derivatives of the approved media and logos above |
+| `og-home.jpg`, `og-long-island.jpg`, `og-brooklyn.jpg` | Social preview derivatives of the approved media and logos above |
+| `og-creative.jpg`, `creative-projects-still.webp` | Frame from the PCP ident (`creative-projects-ident.mp4`) |
+| `creative-pill-chrome.webp`, `creative-pill-shatter.webp` | Approved PCP capsule concept renders from the asset library |
+| `studio-logo-alpha.webp` | `studio-logo.webp` with the black background keyed to transparency |
 | `studio-keyboard.webp` | Existing `assets/star-ceiling.png` (engineer's hand on a red-lit keyboard) |
 | `studio-desk-detail.webp` | Existing `assets/environment.png` (astronaut figurine + ashtray, red-lit desk) |
 | `studio-ambient.webp` | Existing `assets/couch-red.png` (blurred bokeh, mic silhouette against studio lights) |
@@ -50,7 +58,7 @@ All files below are optimized, metadata-free derivatives. The existing public `a
 | `creative-projects-ident-alt-ref.jpg` | Reference still only, not a clean source. Pulled from a screen recording of an alternate/cleaner PCP end-card ("PRXDIGY \| CREATIVE PROJECTS" lockup) — quality is capped by re-recording a phone screen. If this cut should replace the current ident, send the raw video file, not a screen recording, so it can be compressed from source |
 | `wordmark-sketch-reveal.mp4`, `wordmark-sketch-poster.jpg` | A fourth brand mark exploration: hand-drawn/scribble "PRXDIGY STUDIO" in a wobbly sketched oval, small hand-drawn red X over "STUDIO," draws itself in then holds. Real source file this time (not a screen recording). Not approved as canon |
 
-The two Creative Projects work images ship with generic filenames and no artist or track metadata. No source `.mov` is served to browsers.
+Client shoot footage and stills are deliberately not used on the site; Creative Projects shows PRXDIGY's own identity work instead. No source `.mov` is served to browsers.
 
 `assets/hero-bg.png` is a byte-identical duplicate of `assets/neon-light.png` — not a distinct asset, not used.
 
