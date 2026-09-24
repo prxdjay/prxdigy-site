@@ -46,6 +46,8 @@ All files below are optimized, metadata-free derivatives. The existing public `a
 | `wordmark-glitch-dark.webp`, `wordmark-glitch-light-a.webp`, `wordmark-glitch-light-b.webp` | A distressed/glitch-stencil "PRXDIGY X" wordmark treatment — a third brand exploration alongside the chrome GLB and the circular stamp. Not yet approved as canon; still "review brand fit" |
 | `wordmark-glitch-reveal.mp4`, `-poster.jpg` | Compressed from a supplied motion reference: the glitch wordmark snapping into place via motion blur. Useful as a transition technique reference regardless of which wordmark treatment is chosen |
 | `studio-stamp-wide.webp` | Widescreen crop of the circular PRXDIGY STUDIO stamp (existing `assets/logo.png`/`studio-logo.webp` is the square crop) |
+| `brooklyn-x-daylight.webp`, `brooklyn-hallway.webp`, `brooklyn-booth-window.webp`, `brooklyn-desk-wide.webp` | More real Brooklyn location photos — the X installation under work lighting (same installation as `brooklyn-x-installation.webp`, different lighting condition), the entry hallway, the booth viewed through the control-room window, a wider desk shot. One monitor shows "nothing matters nobody cares" — a real detail, not staged for the site |
+| `creative-projects-ident-alt-ref.jpg` | Reference still only, not a clean source. Pulled from a screen recording of an alternate/cleaner PCP end-card ("PRXDIGY \| CREATIVE PROJECTS" lockup) — quality is capped by re-recording a phone screen. If this cut should replace the current ident, send the raw video file, not a screen recording, so it can be compressed from source |
 
 The two Creative Projects work images ship with generic filenames and no artist or track metadata. No source `.mov` is served to browsers.
 
