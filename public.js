@@ -30,27 +30,41 @@ if (menuButton && navigation) {
 
 const results = document.querySelector('.results-grid');
 if (results && !motionReduced.matches && 'IntersectionObserver' in window) {
+  // Counts up once, slowly, when the section is properly in view. Each figure starts at 0,
+  // is staggered behind the one before it, and eases out so the last digits land heavy.
+  const counters = [...results.querySelectorAll('[data-count-to]')];
+  counters.forEach(counter => { counter.textContent = `0${counter.dataset.suffix}`; });
   const observer = new IntersectionObserver(entries => {
-    if (!entries[0].isIntersecting) return;
+    if (!entries.some(entry => entry.isIntersecting)) return;
     observer.disconnect();
-    const counters = [...results.querySelectorAll('[data-count-to]')];
-    const duration = 1150;
+    const duration = 3600, stagger = 450;
     let start;
     function frame(timestamp) {
       if (start === undefined) start = timestamp;
-      const progress = Math.min(1, (timestamp - start) / duration);
-      const eased = 1 - (1 - progress) ** 3;
-      counters.forEach(counter => {
+      let running = false;
+      counters.forEach((counter, i) => {
         const target = Number(counter.dataset.countTo);
+        const progress = Math.min(1, Math.max(0, (timestamp - start - i * stagger) / duration));
+        const eased = 1 - (1 - progress) ** 4;
         counter.textContent = `${Math.round(target * eased)}${counter.dataset.suffix}`;
+        if (progress < 1) running = true;
       });
-      if (progress < 1 && !motionReduced.matches) requestAnimationFrame(frame);
-      else counters.forEach(counter => { counter.textContent = `${counter.dataset.countTo}${counter.dataset.suffix}`; });
+      if (running) requestAnimationFrame(frame);
     }
     requestAnimationFrame(frame);
-  }, { threshold: 0.25 });
+  }, { threshold: 0.45 });
   observer.observe(results);
 }
+
+// Spotify embed: branded loading state, and a plain link if the player never arrives.
+document.querySelectorAll('.embed-shell').forEach(shell => {
+  const frame = shell.querySelector('iframe');
+  if (!frame) return;
+  const ready = () => shell.classList.add('is-loaded');
+  frame.addEventListener('load', ready);
+  window.addEventListener('message', event => { if (event.origin === 'https://open.spotify.com') ready(); });
+  setTimeout(() => { if (!shell.classList.contains('is-loaded')) shell.classList.add('is-fallback'); }, 9000);
+});
 
 // Preserve the existing Google Apps Script booking endpoint and payload.
 const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbz7x0d230bs_ybXRV9nvEF358S6veuCljHXKPvPLKs4RYew9gu3EIYKz1sw_R5K-soHvg/exec';
@@ -154,3 +168,36 @@ document.addEventListener('click', event => {
   setTimeout(() => { location.href = url.href; }, 420);
 });
 window.addEventListener('pageshow', () => document.body.classList.remove('is-leaving'));
+
+// Pause/play for the looping videos; reduced-motion visitors start paused.
+document.querySelectorAll('.media-toggle').forEach(button => {
+  const video = document.getElementById(button.dataset.media);
+  if (!video) return;
+  const sync = () => {
+    const paused = video.paused;
+    button.setAttribute('aria-pressed', String(paused));
+    button.setAttribute('aria-label', paused ? 'Play video' : 'Pause video');
+    button.classList.toggle('is-paused', paused);
+  };
+  if (motionReduced.matches) { video.removeAttribute('autoplay'); video.pause(); }
+  button.addEventListener('click', () => { if (video.paused) video.play(); else video.pause(); });
+  video.addEventListener('play', sync);
+  video.addEventListener('pause', sync);
+  sync();
+});
+
+// Photo reel: auto-drifts with a mouse; on touch screens it becomes a swipeable strip.
+const reelTrack = document.querySelector('.reel-track');
+if (reelTrack && window.matchMedia('(hover: none)').matches) {
+  reelTrack.closest('.reel').classList.add('is-touch');
+  reelTrack.querySelectorAll('[aria-hidden="true"].reel-item').forEach(item => item.remove());
+}
+
+// Gallery tiles: tap toggles the same lift/caption state a mouse gets on hover.
+document.querySelectorAll('.gallery-grid figure').forEach(tile => {
+  tile.addEventListener('click', () => {
+    const on = !tile.classList.contains('is-active');
+    tile.parentElement.querySelectorAll('.is-active').forEach(other => other.classList.remove('is-active'));
+    tile.classList.toggle('is-active', on);
+  });
+});

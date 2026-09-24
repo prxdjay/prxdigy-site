@@ -114,7 +114,7 @@
   };
 
   // ---------- builders ----------
-  function stars(count, box, redShare = 0.1) {
+  function stars(count, box, redShare = 0.1, accent = [1, 0.35, 0.32]) {
     const g = new T.BufferGeometry();
     const p = new Float32Array(count * 3), s = new Float32Array(count), ph = new Float32Array(count), c = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
@@ -122,9 +122,9 @@
       s[i] = 0.05 + Math.pow(Math.random(), 7) * 0.32;
       ph[i] = Math.random() * 6.283;
       const red = Math.random() < redShare;
-      c[i * 3] = red ? 1 : 0.85 + Math.random() * 0.15;
-      c[i * 3 + 1] = red ? 0.35 : 0.88 + Math.random() * 0.12;
-      c[i * 3 + 2] = red ? 0.32 : 1;
+      c[i * 3] = red ? accent[0] : 0.85 + Math.random() * 0.15;
+      c[i * 3 + 1] = red ? accent[1] : 0.88 + Math.random() * 0.12;
+      c[i * 3 + 2] = red ? accent[2] : 1;
     }
     g.setAttribute('position', new T.BufferAttribute(p, 3));
     g.setAttribute('size', new T.BufferAttribute(s, 1));
@@ -286,6 +286,89 @@
     return { h, w: h * camera.aspect };
   }
 
+  // ---------- finalized GLB models ----------
+  // build.mjs lists the model files that exist (data-models), so nothing 404s. Each model is
+  // centred and scaled to fit a unit cube; `turn` corrects how the file was authored.
+  const available = new Set((body.dataset.models || '').split(',').filter(Boolean));
+  const MODEL_SPEC = {
+    'uad-sphere': { turn: [0, 0, 0] },
+    'fuji-xh2s': { turn: [0, -0.5, 0] },
+    'tlm-103': { turn: [0, 0, 0] },
+    'prxdigy-x-final': { turn: [0, 0, 0] },
+  };
+  const modelCache = {};
+  function getModel(name) {
+    if (!available.has(name)) return Promise.resolve(null);
+    if (!modelCache[name]) {
+      modelCache[name] = loadGLB(ASSETS + 'models/' + name + '.glb').then(obj => {
+        const spec = MODEL_SPEC[name] || { turn: [0, 0, 0] };
+        obj.rotation.set(...spec.turn);
+        obj.updateMatrixWorld(true);
+        const box = new T.Box3().setFromObject(obj), size = box.getSize(new T.Vector3()), c = box.getCenter(new T.Vector3());
+        obj.position.sub(c);
+        const fit = new T.Group();
+        fit.add(obj);
+        fit.scale.setScalar(1 / Math.max(size.x, size.y, size.z, 1e-6));
+        fit.traverse(n => { if (n.isMesh) { n.material.envMapIntensity = 1.25; n.material.fog = false; } });
+        return fit;
+      }).catch(() => null);
+    }
+    return modelCache[name].then(m => (m ? m.clone() : null));
+  }
+
+  // Pin a 3D object to a page element: every frame it is placed where that element sits on
+  // screen and sized to it, so models sit beside copy instead of over it.
+  const anchors = [];
+  function pinTo(el, { fill = 0.8, desktop = [0, 0], mobile = [0, 0], depth = 9 } = {}) {
+    const holder = new T.Group(), rig = new T.Group();
+    holder.add(rig);
+    holder.visible = false;
+    scene.add(holder);
+    anchors.push({ el, holder, fill, desktop, mobile, depth });
+    return rig;
+  }
+  const ndc = new T.Vector3(), ray = new T.Vector3();
+  function placeAnchors() {
+    anchors.forEach(a => {
+      const r = a.el.getBoundingClientRect();
+      if (!r.width || !r.height || r.bottom < -innerHeight * 0.25 || r.top > innerHeight * 1.25) { a.holder.visible = false; return; }
+      a.holder.visible = true;
+      const [ox, oy] = portrait() ? a.mobile : a.desktop;
+      const cx = r.left + r.width * (0.5 + ox), cy = r.top + r.height * (0.5 + oy);
+      ndc.set((cx / innerWidth) * 2 - 1, -((cy / innerHeight) * 2 - 1), 0.5).unproject(camera);
+      ray.copy(ndc).sub(camera.position).normalize();
+      a.holder.position.copy(camera.position).addScaledVector(ray, a.depth);
+      a.holder.quaternion.copy(camera.quaternion);
+      const worldH = 2 * a.depth * Math.tan(T.MathUtils.degToRad(camera.fov / 2));
+      a.holder.scale.setScalar((Math.min(r.height, r.width * 1.25) / innerHeight) * worldH * a.fill);
+    });
+  }
+  // Idle float + pointer response for a pinned model, with an eased return to rest.
+  function presenter(rig, { sway = 0.5, tilt = 0.25, bob = 0.03, base = 0 } = {}) {
+    const st = { ry: base, rx: 0, vy: 0, vx: 0 };
+    spinners.push((f, dt) => {
+      if (!rig.parent.visible) return;
+      const ty = base + Math.sin(clock * 0.45) * 0.35 + pointer.sx * sway, tx = -pointer.sy * tilt;
+      st.vy += (ty - st.ry) * 30 * dt; st.vy *= Math.exp(-6 * dt); st.ry += st.vy * dt;
+      st.vx += (tx - st.rx) * 30 * dt; st.vx *= Math.exp(-6 * dt); st.rx += st.vx * dt;
+      rig.rotation.set(st.rx, st.ry, 0);
+      rig.position.y = Math.sin(clock * 0.9) * bob;
+    });
+  }
+  // The standalone X: the procedural gem right away, swapped for the finalized model if present.
+  function brandX(height, glowAmt) {
+    const slot = new T.Group();
+    const proc = makeX(height, glowAmt);
+    slot.add(proc);
+    getModel('prxdigy-x-final').then(m => {
+      if (!m) return;
+      m.scale.multiplyScalar(height * 1.1);
+      slot.remove(proc);
+      slot.add(m);
+    });
+    return slot;
+  }
+
   // ---------- worlds ----------
   const cloudLayers = [];
   const spinners = [];
@@ -364,7 +447,7 @@
 
     const mon = new T.Group();
     mon.position.set(0, floorY + 4.6, -18);
-    const X = makeX(5.4, 3);
+    const X = brandX(5.4, 3);
     const ring = makeRing(3.9, 0.26, 0.42);
     mon.add(X, ring);
     scene.add(mon);
@@ -427,15 +510,15 @@
   function buildLongIsland() {
     scene.fog = new T.FogExp2(0x050506, 0.035);
     const n = LOW ? 60 : 110;
-    const ceil1 = cloudField({ count: n, center: [0, 7.2, -8], spread: [44, 2.4, 22], size: [4, 9], tint: 0x5e6dff, opacity: 0.22 });
-    const ceil2 = cloudField({ count: n, center: [0, 8.4, -12], spread: [50, 2, 18], size: [5, 10], tint: 0x8f86ff, opacity: 0.2, tex: cloudTexB });
+    const ceil1 = cloudField({ count: n, center: [0, 7.2, -8], spread: [44, 2.4, 22], size: [4, 9], tint: 0xd8161e, opacity: 0.2 });
+    const ceil2 = cloudField({ count: n, center: [0, 8.4, -12], spread: [50, 2, 18], size: [5, 10], tint: 0xff3b2a, opacity: 0.16, tex: cloudTexB });
     [ceil1, ceil2].forEach((m, i) => { scene.add(m); cloudLayers.push({ mesh: m, speed: [0.08, -0.06][i], span: 44 }); });
     const dust = stars(LOW ? 260 : 520, [-22, 22, -14, 8, -30, 6], 0.55);
     dust.material.uniforms.uFade.value = 0.5;
     scene.add(dust);
 
     const stamp = new T.Group();
-    const X = makeX(3.3, 4);
+    const X = brandX(3.3, 4);
     stamp.add(X, makeRing(2.35, 0.2, 0.34));
     scene.add(stamp);
     sideAnchor(stamp, [3.1, 0.2, -1], [0, 2.6, -3]);
@@ -444,22 +527,46 @@
     const halo = glow(10, [0, 0, -1.2], 0xff3020, 0.32);
     stamp.add(halo);
 
+    // The cloud ceiling belongs to the top of the page: fully there through the playlist,
+    // gone by the time the gallery (beat 2) is centred.
     spinners.push(f => {
       stamp.rotation.y = Math.sin(clock * 0.3) * 0.12 + pointer.sx * 0.2 + f * 0.35;
       stamp.rotation.x = -pointer.sy * 0.1;
+      const keep = Math.min(1, Math.max(0, 2 - f));
+      ceil1.material.opacity = ceil2.material.opacity = keep;
+      ceil1.visible = ceil2.visible = keep > 0.01;
     });
+
+    const gearStage = document.querySelector('[data-anchor="li-gear"]');
+    const hasGear = !!gearStage && (available.has('uad-sphere') || available.has('fuji-xh2s'));
+    if (hasGear) {
+      [['uad-sphere', { fill: 0.5, desktop: [0, -0.2], mobile: [-0.22, 0] }, { sway: 0.6, base: 0.2 }],
+       ['fuji-xh2s', { fill: 0.4, desktop: [0, 0.24], mobile: [0.24, 0.02] }, { sway: 0.7, base: -0.5 }]].forEach(([name, pin, motion]) => {
+        getModel(name).then(m => {
+          if (!m) return;
+          const rig = pinTo(gearStage, pin);
+          rig.add(m);
+          presenter(rig, motion);
+        });
+      });
+      const gearLight = new T.PointLight(0xff3020, 1.2, 30, 1.6);
+      camera.add(gearLight);
+      gearLight.position.set(-3, 2, 2);
+      scene.add(camera);
+    }
     return {
       bloom: [0.26, 0.35, 0.86],
       keys: {
         hero: { pos: [0, 0, 11], look: [0, 0.6, 0] },
         listen: { pos: [0.4, -3.2, 11], look: [0.6, -1.6, 0], dim: 0.55 },
         gallery: { pos: [0.4, -6, 11], look: [0.6, -4.5, 0], dim: 0.35 },
-        services: { pos: [0, -8, 11], look: [0, -7, 0], dim: 0.3 },
+        services: { pos: [0, -8, 11], look: [0, -7, 0], dim: hasGear ? 0.95 : 0.3 },
         story: { pos: [0, -9.5, 11], look: [0, -8.5, 0], dim: 0.3 },
         book: { pos: [0, -11, 11], look: [0, -10, 0], dim: 0.16 },
       },
       mobileKeys: {
         hero: { pos: [0, -0.5, 13], look: [0, -0.4, 0] },
+        listen: { pos: [0, -5.5, 11], look: [0, -5.2, 0], dim: 0.5 },
       },
     };
   }
@@ -480,14 +587,18 @@
       return new T.LatheGeometry(pts.map(p => new T.Vector2(Math.max(p.x, 0.0001), p.y)), 96);
     };
     const top = new T.Mesh(half(1), chrome());
-    const glass = new T.MeshStandardMaterial({ color: 0x0b0b0e, metalness: 0.35, roughness: 0.04, transparent: true, opacity: 0.5, envMapIntensity: 1.8, depthWrite: false, side: T.DoubleSide });
+    // Real refraction where the GPU can afford it; a light tinted glass elsewhere.
+    const glass = LOW
+      ? new T.MeshStandardMaterial({ color: 0x9aa3b5, metalness: 0.2, roughness: 0.05, transparent: true, opacity: 0.22, envMapIntensity: 1.6, depthWrite: false, side: T.DoubleSide })
+      : new T.MeshPhysicalMaterial({ color: 0xffffff, metalness: 0, roughness: 0.04, transmission: 1, thickness: 0.35, ior: 1.45, clearcoat: 1, clearcoatRoughness: 0.05, envMapIntensity: 1.5, side: T.DoubleSide });
     const bottom = new T.Mesh(half(-1), glass);
     const band = new T.Mesh(new T.TorusGeometry(R * 1.01, 0.05, 16, 96), chrome());
     band.rotation.x = Math.PI / 2;
+    // The logo floats inside the glass half; `inner` counter-rotates so it stays upright.
     const inner = new T.Group();
-    const X = makeX(1.05, 5);
-    inner.add(X, makeRing(0.72, 0.07, 0.1));
-    inner.position.set(0, -H * 0.9, 0);
+    const X = brandX(1.0, 5);
+    inner.add(X, makeRing(0.7, 0.06, 0.09));
+    inner.position.set(0, -H * 0.85, 0);
     g.add(top, bottom, band, inner);
     g.rotation.z = -Math.PI / 2;
     g.userData.inner = inner;
@@ -509,15 +620,26 @@
     holder.scale.setScalar(1.02);
     scene.add(holder);
     sideAnchor(holder, [3.3, -6.2, -1], [0, -5.8, -2]);
+    holder.add(glow(6, [0, -1.6, -0.8], 0xff2a1a, 0.18));
     const light = new T.PointLight(0xff2a1a, 1.6, 12, 1.8);
     light.position.set(0, 0, 2.2);
     holder.add(light);
     holder.add(glow(9, [0, 0, -1.6], 0xff3020, 0.28));
 
-    spinners.push(f => {
-      cap.rotation.x = f * 0.9 + Math.sin(clock * 0.35) * 0.08 + pointer.sy * 0.12;
-      holder.rotation.y = -0.35 + pointer.sx * 0.2 + Math.sin(clock * 0.25) * 0.06;
-      cap.userData.inner.rotation.y = -cap.rotation.x * 0.2;
+    // Springs: pointer and scroll push the pill hard, then it eases back to rest.
+    const k = LOW ? 0.5 : 1;
+    const st = { ry: -0.35, vy: 0, rx: 0, vx: 0, roll: 0, vroll: 0 };
+    spinners.push((f, dt, vel) => {
+      const ty = -0.35 + pointer.sx * 0.95 * k + Math.sin(clock * 0.25) * 0.06;
+      const tx = pointer.sy * 0.45 * k;
+      st.vy += (ty - st.ry) * 34 * dt; st.vy *= Math.exp(-5.5 * dt); st.ry += st.vy * dt;
+      st.vx += (tx - st.rx) * 34 * dt; st.vx *= Math.exp(-5.5 * dt); st.rx += st.vx * dt;
+      st.vroll += vel * 0.0016 * k * dt;
+      st.vroll += -st.roll * 18 * dt; st.vroll *= Math.exp(-3.2 * dt); st.roll += st.vroll * dt;
+      const spin = f * 1.6 + st.roll + Math.sin(clock * 0.35) * 0.08;
+      cap.rotation.x = spin;
+      holder.rotation.set(st.rx, st.ry, 0);
+      cap.userData.inner.rotation.y = -spin;
     });
     return {
       bloom: [0.26, 0.35, 0.86],
@@ -527,10 +649,10 @@
         capabilities: { pos: [0.4, -9, 10], look: [0.6, -8, 0], dim: 0.25 },
         work: { pos: [0.2, -11, 10], look: [0.3, -10.4, 0], dim: 0.35 },
         process: { pos: [0, -12.5, 10], look: [0, -12, 0], dim: 0.35 },
-        contact: { pos: [0, -6.4, 9], look: [0, -6.2, 0], dim: 0.7 },
+        contact: { pos: [1.7, -6.3, 10], look: [1.9, -6.2, 0], dim: 0.7 },
       },
       mobileKeys: {
-        hero: { pos: [0, 0, 12], look: [0, -0.2, 0], dim: 0.6 },
+        hero: { pos: [0, 1.6, 12], look: [0, 1.4, 0], dim: 0.6 },
         results: { pos: [0, -6, 10], look: [0, -7.6, 0] },
         contact: { pos: [0, -6.2, 10], look: [0, -7.4, 0], dim: 0.6 },
       },
@@ -538,47 +660,87 @@
   }
 
   function buildBrooklyn() {
-    scene.fog = new T.FogExp2(0x040410, 0.03);
-    renderer.setClearColor(0x04040a, 1);
-    const dust = stars(LOW ? 320 : 700, [-24, 24, -14, 10, -30, 6], 0.05);
-    dust.material.uniforms.uFade.value = 0.55;
+    const BLUE = 0x2f64ff, BLUE_2 = 0x5b8cff, ICE = 0xe4ecff;
+    scene.fog = new T.FogExp2(0x02040d, 0.03);
+    renderer.setClearColor(0x02030a, 1);
+    const dust = stars(LOW ? 320 : 700, [-24, 24, -14, 10, -30, 6], 0.22, [0.45, 0.62, 1]);
+    dust.material.uniforms.uFade.value = 0.6;
     scene.add(dust);
+    const haze = cloudField({ count: LOW ? 40 : 70, center: [0, -9, -10], spread: [50, 4, 20], size: [6, 12], tint: 0x1d3cff, opacity: 0.12 });
+    scene.add(haze);
+    cloudLayers.push({ mesh: haze, speed: 0.06, span: 50 });
 
+    // The installation: an X of LED-lit cloud between two uprights, with a beam across the top
+    // and the bottom, the way it hangs in the room.
     const inst = new T.Group();
-    const L = 2.7, per = LOW ? 70 : 120;
-    const a = cloudField({ count: per, line: [[-L, -L * 1.2, 0], [L, L * 1.2, 0]], size: [0.7, 1.7], tint: 0x8f7dff, opacity: 0.34, jitter: 0.22 });
-    const b = cloudField({ count: per, line: [[-L, L * 1.2, 0.1], [L, -L * 1.2, 0.1]], size: [0.7, 1.7], tint: 0xa596ff, opacity: 0.34, jitter: 0.22, tex: cloudTexB });
-    const beamT = cloudField({ count: Math.round(per * 0.6), line: [[-6, 4.2, -1.5], [6, 4.2, -1.5]], size: [0.8, 1.8], tint: 0x7d70ff, opacity: 0.22, jitter: 0.18 });
-    const beamB = cloudField({ count: Math.round(per * 0.6), line: [[-6, -4.2, -1.5], [6, -4.2, -1.5]], size: [0.8, 1.8], tint: 0x7d70ff, opacity: 0.2, jitter: 0.18, tex: cloudTexB });
-    inst.add(a, b, beamT, beamB, glow(7, [0, 0, -0.4], 0xece6ff, 0.55), glow(18, [0, 0, -2], 0x6a58ff, 0.3));
+    const L = 2.7, per = LOW ? 70 : 120, W = L * 1.08, Hh = L * 1.25;
+    const strip = (from, to, tint, count, tex = cloudTexA, op = 0.34) => cloudField({ count, line: [from, to], size: [0.7, 1.6], tint, opacity: op, jitter: 0.2, tex });
+    inst.add(
+      strip([-W, -Hh, 0], [W, Hh, 0], BLUE_2, per),
+      strip([-W, Hh, 0.1], [W, -Hh, 0.1], BLUE, per, cloudTexB),
+      strip([-W, -Hh, -0.2], [-W, Hh, -0.2], BLUE, Math.round(per * 0.55), cloudTexA, 0.26),
+      strip([W, -Hh, -0.2], [W, Hh, -0.2], BLUE, Math.round(per * 0.55), cloudTexB, 0.26),
+      strip([-6.5, Hh + 0.3, -1.2], [6.5, Hh + 0.3, -1.2], BLUE_2, Math.round(per * 0.6), cloudTexA, 0.24),
+      strip([-6.5, -Hh - 0.2, -1.2], [6.5, -Hh - 0.2, -1.2], BLUE, Math.round(per * 0.6), cloudTexB, 0.2),
+      glow(7, [0, 0, -0.4], ICE, 0.55), glow(20, [0, 0, -2], BLUE, 0.34),
+    );
+    const blueLight = new T.PointLight(0x3a6bff, 2.2, 22, 1.6);
+    blueLight.position.set(0, 0, 3);
+    inst.add(blueLight);
     scene.add(inst);
     sideAnchor(inst, [3.3, 0.2, -2.5], [0, 2.2, -4]);
 
     spinners.push(f => {
       inst.rotation.y = Math.sin(clock * 0.2) * 0.08 + pointer.sx * 0.15 + f * 0.12;
       inst.rotation.x = -pointer.sy * 0.08;
-      const s = 1 + Math.sin(clock * 0.8) * 0.012;
-      inst.scale.setScalar(s);
+      inst.scale.setScalar(1 + Math.sin(clock * 0.8) * 0.012);
+      blueLight.intensity = 2.2 + Math.sin(clock * 1.3) * 0.35;
     });
+
+    const micStage = document.querySelector('[data-anchor="bk-mic"]');
+    const hasMic = !!micStage && available.has('tlm-103');
+    if (hasMic) {
+      getModel('tlm-103').then(m => {
+        if (!m) return;
+        const rig = pinTo(micStage, { fill: 0.85 });
+        rig.add(m);
+        presenter(rig, { sway: 0.55, tilt: 0.2 });
+      });
+      const rim = new T.PointLight(0x4d7cff, 1.6, 30, 1.6);
+      camera.add(rim);
+      rim.position.set(3, 1.5, 1);
+      scene.add(camera);
+    }
     return {
-      bloom: [0.3, 0.4, 0.8],
+      bloom: [0.34, 0.42, 0.78],
       keys: {
         hero: { pos: [0, 0, 11], look: [0, 0.3, 0] },
-        installation: { pos: [1.4, 0, 7.5], look: [2.3, 0.1, -2.5], dim: 0.75 },
+        installation: { pos: [1.4, 0, 7.5], look: [2.3, 0.1, -2.5], dim: 0.45 },
         room: { pos: [0.6, -4, 11], look: [0.8, -3, 0], dim: 0.35 },
-        detail: { pos: [0.4, -6.5, 11], look: [0.6, -5.5, 0], dim: 0.3 },
+        detail: { pos: [0.4, -6.5, 11], look: [0.6, -5.5, 0], dim: hasMic ? 0.95 : 0.3 },
         links: { pos: [0, -3, 12], look: [0, -2, 0], dim: 0.55 },
       },
       mobileKeys: {
-        installation: { pos: [0, 1, 8], look: [0, 1.6, -4], dim: 0.7 },
+        installation: { pos: [0, 1, 8], look: [0, 1.6, -4], dim: 0.4 },
       },
     };
+  }
+
+  // The Team: a quiet starfield with a blue glow under the portraits.
+  function buildTeam() {
+    scene.fog = new T.FogExp2(0x03040a, 0.03);
+    scene.add(stars(LOW ? 700 : 1300, [-30, 30, -16, 14, -40, 4], 0.18, [0.45, 0.62, 1]));
+    const floor = cloudField({ count: LOW ? 45 : 80, center: [0, -9, -10], spread: [52, 4, 22], size: [6, 12], tint: 0x2f5bff, opacity: 0.14 });
+    scene.add(floor);
+    cloudLayers.push({ mesh: floor, speed: 0.06, span: 52 });
+    scene.add(glow(30, [0, -7, -14], 0x2f5bff, 0.28));
+    return { bloom: [0.26, 0.35, 0.86], keys: { hero: { pos: [0, 0, 12], look: [0, 0.2, 0] }, members: { pos: [0, -3.5, 12], look: [0, -4.5, 0], dim: 0.7 } } };
   }
 
   function buildLost() {
     scene.fog = new T.FogExp2(0x050506, 0.03);
     scene.add(stars(LOW ? 900 : 1600, [-30, 30, -14, 14, -40, 4], 0.1));
-    const X = makeX(2.4, 4);
+    const X = brandX(2.4, 4);
     sideAnchor(X, [3.2, 0.2, -1], [0, 2.2, -2]);
     scene.add(X);
     spinners.push(() => { X.rotation.y = Math.sin(clock * 0.4) * 0.3 + pointer.sx * 0.3; });
@@ -588,7 +750,7 @@
   const onResize = [];
   let clock = 0;
   const pointer = { x: 0, y: 0, sx: 0, sy: 0 };
-  const builders = { home: buildHome, 'long-island': buildLongIsland, creative: buildCreative, brooklyn: buildBrooklyn, lost: buildLost };
+  const builders = { home: buildHome, 'long-island': buildLongIsland, creative: buildCreative, brooklyn: buildBrooklyn, team: buildTeam, lost: buildLost };
   const world = (builders[kind] || buildLost)();
 
   // ---------- post ----------
@@ -662,12 +824,15 @@
   if (!reduce && window.Lenis) {
     lenis = new window.Lenis({ lerp: 0.085, wheelMultiplier: 0.9 });
     document.addEventListener('click', e => {
-      const a = e.target.closest('a[href^="#"]');
-      if (!a || a.getAttribute('href').length < 2) return;
-      const target = document.querySelector(a.getAttribute('href'));
+      const a = e.target.closest('a[href*="#"]');
+      if (!a) return;
+      const url = new URL(a.href, location.href);
+      if (url.pathname !== location.pathname || url.hash.length < 2) return;
+      const target = document.getElementById(decodeURIComponent(url.hash.slice(1)));
       if (!target) return;
       e.preventDefault();
       lenis.scrollTo(target, { offset: -70 });
+      history.replaceState(null, '', url.hash);
     });
   }
 
@@ -717,8 +882,9 @@
     cloudLayers.forEach(l => { l.mesh.position.x = Math.sin(clock * l.speed * 0.1) * l.span * 0.12; });
     scene.traverse(o => { if (o.userData.star) o.material.uniforms.uTime.value = clock; });
     sweepTime.value = clock;
-    spinners.forEach(fn => fn(f));
     applyCamera(f);
+    spinners.forEach(fn => fn(f, dt, reduce ? 0 : velocity));
+    placeAnchors();
     composer.render(dt);
     if (!shown) { shown = true; body.classList.add('world-ready'); }
     requestAnimationFrame(frame);

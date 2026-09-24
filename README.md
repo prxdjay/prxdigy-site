@@ -1,6 +1,6 @@
 # PRXDIGY public website
 
-Static GitHub Pages site for `prxdigystudio.com`. The public pages live at `/`, `/studio/long-island/`, `/creative-projects/`, and `/studio/brooklyn/`. The private Supabase staff portal remains under `/portal/` and has its own CSS and JavaScript.
+Static GitHub Pages site for `prxdigystudio.com`. The public pages live at `/`, `/studio/long-island/`, `/creative-projects/`, `/studio/brooklyn/`, and `/team/`; `/terms.html` is the T&C page in the main navigation. The private Supabase staff portal remains under `/portal/` and has its own CSS and JavaScript.
 
 ## Build
 
@@ -16,7 +16,7 @@ There are no production npm dependencies. GitHub Pages serves the generated file
 
 ## Editing public content
 
-- `site-config.mjs` owns the destination order, location statuses, Instagram, text number, and 2026 results.
+- `site-config.mjs` owns the destination order (homepage cards), the primary navigation order, location statuses, Instagram, text number, and 2026 results.
 - `build.mjs` owns the four page bodies, shared header/footer, titles, and metadata.
 - `public.css` owns the public design and responsive behavior.
 - `public.js` owns the mobile menu, one-time results animation, Long Island application submission, scroll reveals, and the page-change wipe.
@@ -25,6 +25,19 @@ There are no production npm dependencies. GitHub Pages serves the generated file
 - Brooklyn uses real location photos; the address stays unpublished until supplied.
 
 The Long Island application keeps the existing Google Apps Script endpoint and submission payload. The browser sends its POST with `no-cors`, so it can confirm that the request was sent by the browser but cannot inspect the endpoint's response. The existing SMS consent, policy links, field names, and success/failure actions remain. Do not replace the endpoint without verifying the new backend.
+
+## 3D models
+
+`world.js` loads finalized GLB models only when the file exists; `build.mjs` checks `assets/models/` and tells the page which ones are there, so a missing model never leaves an empty frame or a 404.
+
+| File | Where it appears |
+| --- | --- |
+| `assets/models/uad-sphere.glb` | Long Island, beside the services list |
+| `assets/models/fuji-xh2s.glb` | Long Island, beside the services list |
+| `assets/models/tlm-103.glb` | Brooklyn, its own "On the mic" section |
+| `assets/models/prxdigy-x-final.glb` | Replaces the code-built X everywhere (Long Island stamp, home monument, inside the Creative Projects pill) |
+
+Models are pinned to page elements (`data-anchor`), so they sit beside the copy at every screen size. Compress before committing: textures at 1024–2048px JPEG, geometry simplified, target 1–5MB per file.
 
 ## Media provenance
 
@@ -47,6 +60,10 @@ All files below are optimized, metadata-free derivatives. The existing public `a
 | `wordmark-3d-poster.png`, `x-3d-poster.png` | Static fallback renders of `assets/models/*.glb`, recovered from an earlier local build attempt |
 | `prxdigy-x-original.png` | Current flat/vector red X asset (distinct from the 3D chrome X model) |
 | `lifted/studio-*.webp` | Brighter alternate exposure treatments of the same studio photography — candidates for use against a very dark 3D scene where the standard exposure would go muddy |
+| `v2/li-*.webp` | Finalized Long Island photography (red), supplied during the revision pass; originals kept in `assets/incoming/li-v2/` |
+| `v2/bk-*.webp` | Finalized Brooklyn photography (blue), supplied during the revision pass; originals kept in `assets/incoming/brooklyn-v2/` |
+| `*-800.webp` | 800px copies served to small screens through `srcset` |
+| `wordmark-tight.webp` | `wordmark.webp` cropped to the artwork, for the inline logo in the homepage headline |
 | `brooklyn-x-installation.webp` | Real Brooklyn location photo — neon violet X-shaped light installation on the ceiling |
 | `brooklyn-studio-wide.webp`, `brooklyn-studio-wide-alt.webp` | Real Brooklyn location photos — wide shots of the work room under the X installation |
 | `brooklyn-desk-detail.webp`, `brooklyn-gear-detail.webp` | Real Brooklyn location photos — monitor/desk setup and studio gear detail |
