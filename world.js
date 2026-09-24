@@ -272,6 +272,12 @@
   }
 
   function loadGLB(url) {
+    // Previews that can't serve .glb embed it as base64 (window.PRX_GLB[url basename]).
+    const inline = window.PRX_GLB && window.PRX_GLB[url.split('/').pop()];
+    if (inline) {
+      const bytes = Uint8Array.from(atob(inline), ch => ch.charCodeAt(0));
+      return new Promise((res, rej) => new T.GLTFLoader().parse(bytes.buffer, '', g => res(g.scene), rej));
+    }
     return new Promise((res, rej) => new T.GLTFLoader().load(url, g => res(g.scene), undefined, rej));
   }
 
