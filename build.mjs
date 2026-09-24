@@ -5,7 +5,7 @@ import { site } from './site-config.mjs';
 // relative-path copy (index.html, long-island.html, ...) for sharing a preview.
 const previewAt = process.argv.indexOf('--preview');
 const PREVIEW = previewAt > -1 ? process.argv[previewAt + 1] : null;
-const flat = { '/': 'index.html', '/studio/long-island/': 'long-island.html', '/creative-projects/': 'creative-projects.html', '/studio/brooklyn/': 'brooklyn.html' };
+const flat = { '/': 'index.html', '/studio/long-island/': 'long-island.html', '/creative-projects/': 'creative-projects.html', '/studio/brooklyn/': 'brooklyn.html', '/team/': 'team.html' };
 const L = href => {
   if (!PREVIEW || !href.startsWith('/')) return href;
   const [path, hash = ''] = href.split('#');
@@ -27,8 +27,7 @@ function header(active = '') {
     <div class="header-inner wrap">
       <a class="brand" href="${L('/')}" aria-label="PRXDIGY home"><img src="${A}wordmark.webp" alt="PRXDIGY" width="1200" height="400"></a>
       <nav class="site-nav" id="primary-nav" aria-label="Primary navigation">
-        ${destinations.map((item, i) => `<a href="${L(item.href)}"${active === item.href ? ' aria-current="page"' : ''}><span class="nav-index">0${i + 1}</span>${item.label}</a>`).join('')}
-        <a href="${L('/#contact')}"><span class="nav-index">04</span>Contact</a>
+        ${site.nav.map((item, i) => `<a href="${L(item.href)}"${active === item.href ? ' aria-current="page"' : ''}><span class="nav-index">0${i + 1}</span>${item.label}</a>`).join('')}
       </nav>
       <a class="header-cta" href="${L('/#contact')}" aria-label="Start a Project"><span class="header-cta-full">Start a Project</span><span class="header-cta-short" aria-hidden="true">Start</span>${arrow}</a>
       <button class="menu-toggle" type="button" aria-label="Open navigation" aria-controls="primary-nav" aria-expanded="false"><span></span><span></span></button>
@@ -195,6 +194,19 @@ const brooklyn = page({
   <section class="beat bk-links" data-beat="links"><div class="wrap brooklyn-next"><p>Explore another part of PRXDIGY</p><a href="${L(destinations[0].href)}">Explore Long Island ${arrow}</a><a href="${L(destinations[1].href)}">Explore Creative Projects ${arrow}</a></div></section>`
 });
 
+// ---------- The Team ----------
+const teamPlaceholders = [1, 2, 3, 4].map(n => ({
+  name: `Team Member 0${n}`, role: 'Role pending', bio: 'Biography coming soon — approved copy lands here once it is provided.',
+}));
+
+const team = page({
+  title: 'The Team — PRXDIGY',
+  description: 'The people behind PRXDIGY — profiles coming soon.',
+  path: '/team/', og: 'og-home.jpg', active: '/team/', className: 'page-team', world: 'lost',
+  body: `<section class="beat team-hero" data-beat="hero"><div class="wrap"><p class="eyebrow"><span class="eyebrow-line"></span>PRXDIGY / Who's behind it</p><h1 class="glitch-title">The Team</h1><p class="hero-description">Profiles are on the way — check back soon.</p></div></section>
+  <section class="section team-section"><div class="wrap"><div class="team-grid">${teamPlaceholders.map(m => `<article class="team-card" data-reveal><div class="team-portrait" aria-hidden="true"><span class="team-portrait-mark">＋</span><span class="team-portrait-label">Portrait pending</span></div><div class="team-copy"><h3>${m.name}</h3><p class="team-role">${m.role}</p><p class="team-bio">${m.bio}</p><div class="team-links"><span class="team-link-pending">Social — pending</span><span class="team-link-pending">Contact — pending</span></div></div></article>`).join('')}</div></div></section>`
+});
+
 const notFound = page({
   title: 'Page Not Found — PRXDIGY', description: 'This PRXDIGY page could not be found. Explore our studios and Creative Projects.', path: '/404.html', og: 'og-home.jpg', className: 'page-404', world: 'lost',
   body: `<section class="beat not-found" data-beat="hero"><div class="wrap"><p class="eyebrow"><span class="eyebrow-line"></span>404 / Page not found</p><h1 class="glitch-title">Wrong turn.<br><em>Right company.</em></h1><p>That page isn't here. Find the part of PRXDIGY you need.</p><div class="action-row"><a class="button button-light" href="${L('/')}">Back to PRXDIGY ${arrow}</a><a class="text-link" href="${L(destinations[0].href)}">Explore Long Island ${arrow}</a></div></div></section>`
@@ -226,7 +238,7 @@ if (!PREVIEW) for (const name of ['privacy.html', 'terms.html']) {
   html = html.replace('href="styles.css"', 'href="/public.css"');
   if (!html.includes('src="/public.js"')) html = html.replace('</body>', '<script src="/public.js" defer></script>\n</body>');
   html = html.replaceAll('sms:+18884958012', sms).replaceAll('+1 (888) 495-8012', site.text.label);
-  const sharedHeader = `<!-- PUBLIC HEADER START -->\n${header()}\n<!-- PUBLIC HEADER END -->`;
+  const sharedHeader = `<!-- PUBLIC HEADER START -->\n${header(name === 'terms.html' ? '/terms.html' : '')}\n<!-- PUBLIC HEADER END -->`;
   const sharedFooter = `<!-- PUBLIC FOOTER START -->\n${footer()}\n<!-- PUBLIC FOOTER END -->`;
   if (html.includes('<!-- PUBLIC HEADER START -->')) html = html.replace(/<!-- PUBLIC HEADER START -->[\s\S]*?<!-- PUBLIC HEADER END -->/, sharedHeader);
   else html = html.replace(/<!-- TEXTURE OVERLAYS -->[\s\S]*?<\/nav>/, sharedHeader);
