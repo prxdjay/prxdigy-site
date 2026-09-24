@@ -351,6 +351,7 @@ h3{font-family:var(--display);line-height:1;letter-spacing:.015em;text-transform
 .embed-link:hover{color:#fff;border-color:var(--red)}
 .embed-card{display:flex;flex-direction:column;justify-content:center;gap:18px;min-height:352px;padding:34px;border-radius:12px;background:radial-gradient(80% 90% at 20% 20%,rgba(var(--accent-rgb),.22),transparent 60%),#0d0d10}
 .embed-card .kicker{margin:0}
+.embed-card .button{align-self:flex-start}
 .embed-card strong{font:400 clamp(36px,4vw,56px)/.95 var(--display);text-transform:uppercase}
 .embed-fallback:hover{border-color:var(--red);box-shadow:0 0 24px rgba(var(--accent-rgb),.35)}
 
