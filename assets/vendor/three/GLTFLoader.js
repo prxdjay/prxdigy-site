@@ -1995,7 +1995,12 @@
 			this.nodeNamesUsed = {}; // Use an THREE.ImageBitmapLoader if imageBitmaps are supported. Moves much of the
 			// expensive work of uploading a texture to the GPU off the main thread.
 
-			if ( typeof createImageBitmap !== 'undefined' && /Firefox/.test( navigator.userAgent ) === false ) {
+			// PRXDIGY patch: always decode through an <img> (TextureLoader). The ImageBitmapLoader
+			// path fetch()es each embedded texture's blob: URL, which Safari/iOS mishandles in this
+			// release and which a strict connect-src CSP refuses outright; either way the texture is
+			// dropped and the model renders untextured white. Later three.js releases also skip
+			// ImageBitmapLoader on Safari for the same reason.
+			if ( false && typeof createImageBitmap !== 'undefined' && /Firefox/.test( navigator.userAgent ) === false ) {
 
 				this.textureLoader = new THREE.ImageBitmapLoader( this.options.manager );
 

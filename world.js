@@ -330,7 +330,7 @@
         fit.scale.setScalar(1 / Math.max(size.x, size.y, size.z, 1e-6));
         authoredLight(fit, 1.05);
         return fit;
-      }).catch(() => null);
+      }).catch(err => { console.warn('PRXDIGY: model ' + name + ' did not load', err); return null; });
     }
     return modelCache[name].then(m => (m ? m.clone() : null));
   }
@@ -363,15 +363,16 @@
     });
   }
   // Idle float + pointer response for a pinned model, with an eased return to rest.
-  function presenter(rig, { sway = 0.5, tilt = 0.25, bob = 0.03, base = 0 } = {}) {
+  function presenter(rig, { sway = 0.5, tilt = 0.25, bob = 0.03, base = 0, drift = 0, roll = 0, phase = 0 } = {}) {
     const st = { ry: base, rx: 0, vy: 0, vx: 0 };
     spinners.push((f, dt) => {
       if (!rig.parent.visible) return;
-      const ty = base + Math.sin(clock * 0.45) * 0.35 + pointer.sx * sway, tx = -pointer.sy * tilt;
+      const t = clock + phase;
+      const ty = base + Math.sin(t * 0.45) * 0.35 + pointer.sx * sway, tx = -pointer.sy * tilt + Math.sin(t * 0.33) * roll;
       st.vy += (ty - st.ry) * 30 * dt; st.vy *= Math.exp(-6 * dt); st.ry += st.vy * dt;
       st.vx += (tx - st.rx) * 30 * dt; st.vx *= Math.exp(-6 * dt); st.rx += st.vx * dt;
-      rig.rotation.set(st.rx, st.ry, 0);
-      rig.position.y = Math.sin(clock * 0.9) * bob;
+      rig.rotation.set(st.rx, st.ry, Math.sin(t * 0.27) * roll);
+      rig.position.set(Math.sin(t * 0.21) * drift, Math.sin(t * 0.9) * bob + Math.sin(t * 0.37) * drift * 0.6, 0);
     });
   }
   // The X inside its chrome ring: the code-built version right away, replaced by the finalized
@@ -549,7 +550,12 @@
     const n = LOW ? 60 : 110;
     const ceil1 = cloudField({ count: n, center: [0, 7.2, -8], spread: [44, 2.4, 22], size: [4, 9], tint: 0xd8161e, opacity: 0.2 });
     const ceil2 = cloudField({ count: n, center: [0, 8.4, -12], spread: [50, 2, 18], size: [5, 10], tint: 0xff3b2a, opacity: 0.16, tex: cloudTexB });
-    [ceil1, ceil2].forEach((m, i) => { scene.add(m); cloudLayers.push({ mesh: m, speed: [0.08, -0.06][i], span: 44 }); });
+    // Lower banks so the clouds follow the camera down to the photo slideshow.
+    const low1 = cloudField({ count: Math.round(n * 0.8), center: [0, 1.5, -14], spread: [50, 3.5, 12], size: [5, 11], tint: 0xc8141c, opacity: 0.16 });
+    const low2 = cloudField({ count: Math.round(n * 0.8), center: [0, -3.5, -15], spread: [52, 4, 12], size: [6, 12], tint: 0xff3b2a, opacity: 0.13, tex: cloudTexB });
+    const low3 = cloudField({ count: Math.round(n * 0.6), center: [0, -7.5, -16], spread: [54, 3, 10], size: [6, 12], tint: 0xb01018, opacity: 0.12 });
+    const clouds = [ceil1, ceil2, low1, low2, low3];
+    clouds.forEach((m, i) => { scene.add(m); cloudLayers.push({ mesh: m, speed: [0.08, -0.06, 0.05, -0.05, 0.04][i], span: 48 }); });
     const dust = stars(LOW ? 260 : 520, [-22, 22, -14, 8, -30, 6], 0.55);
     dust.material.uniforms.uFade.value = 0.5;
     scene.add(dust);
@@ -563,21 +569,20 @@
     const halo = glow(10, [0, 0, -1.2], 0xff3020, 0.32);
     stamp.add(halo);
 
-    // The cloud ceiling belongs to the top of the page: fully there through the playlist,
-    // gone by the time the gallery (beat 2) is centred.
+    // The clouds run from the top of the page down to the photo slideshow: full strength
+    // until just before the gallery (beat 2), faded out once it is centred.
     spinners.push(f => {
       stamp.rotation.y = Math.sin(clock * 0.3) * 0.12 + pointer.sx * 0.2 + f * 0.35;
       stamp.rotation.x = -pointer.sy * 0.1;
-      const keep = Math.min(1, Math.max(0, 2 - f));
-      ceil1.material.opacity = ceil2.material.opacity = keep;
-      ceil1.visible = ceil2.visible = keep > 0.01;
+      const keep = Math.min(1, Math.max(0, (2.35 - f) / 0.6));
+      clouds.forEach(m => { m.material.opacity = keep; m.visible = keep > 0.01; });
     });
 
     const gearStage = document.querySelector('[data-anchor="li-gear"]');
     const hasGear = !!gearStage && (available.has('uad-sphere') || available.has('fuji-xh2s'));
     if (hasGear) {
-      [['uad-sphere', { fill: 0.64, desktop: [-0.08, -0.19], mobile: [-0.22, 0] }, { sway: 0.6, base: 0.2 }],
-       ['fuji-xh2s', { fill: 0.52, desktop: [0.06, 0.25], mobile: [0.24, 0.04] }, { sway: 0.7, base: -0.5 }]].forEach(([name, pin, motion]) => {
+      [['uad-sphere', { fill: 0.64, desktop: [-0.08, -0.19], mobile: [-0.22, 0] }, { sway: 0.6, base: 0.2, bob: 0.06, drift: 0.05, roll: 0.12, phase: 0 }],
+       ['fuji-xh2s', { fill: 0.52, desktop: [0.06, 0.25], mobile: [0.24, 0.04] }, { sway: 0.7, base: -0.5, bob: 0.07, drift: 0.06, roll: 0.16, phase: 2.1 }]].forEach(([name, pin, motion]) => {
         getModel(name).then(m => {
           if (!m) return;
           const rig = pinTo(gearStage, pin);
@@ -594,8 +599,8 @@
       bloom: [0.26, 0.35, 0.86],
       keys: {
         hero: { pos: [0, 0, 11], look: [0, 0.6, 0] },
-        listen: { pos: [0.4, -3.2, 11], look: [0.6, -1.6, 0], dim: 0.55 },
-        gallery: { pos: [0.4, -6, 11], look: [0.6, -4.5, 0], dim: 0.35 },
+        listen: { pos: [0.4, -3.2, 11], look: [0.6, -1.6, 0], dim: 0.75 },
+        gallery: { pos: [0.4, -6, 11], look: [0.6, -4.5, 0], dim: 0.45 },
         services: { pos: [0, -8, 11], look: [0, -7, 0], dim: hasGear ? 0.95 : 0.3 },
         story: { pos: [0, -9.5, 11], look: [0, -8.5, 0], dim: 0.3 },
         book: { pos: [0, -11, 11], look: [0, -10, 0], dim: 0.16 },

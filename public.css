@@ -5,7 +5,7 @@
 @font-face{font-family:'Inter';font-style:normal;font-weight:700;font-display:swap;src:url(assets/fonts/inter-latin-700-normal.woff2) format('woff2')}
 @font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:400;font-display:swap;src:url(assets/fonts/jetbrains-mono-latin-400-normal.woff2) format('woff2')}
 @font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:500;font-display:swap;src:url(assets/fonts/jetbrains-mono-latin-500-normal.woff2) format('woff2')}
-:root{--void:#050506;--ink:#0a0a0c;--ink-2:#111114;--ink-3:#1a1a1f;--line:rgba(255,255,255,.1);--line-2:rgba(255,255,255,.2);--paper:#f4f1ee;--muted:#aaa5a8;--subtle:#76717a;--red:#ff2b2b;--ruby:#c4101c;--violet:#9d8cff;--accent-rgb:255,43,43;--blue:#3f73ff;--blue-rgb:63,115,255;--glass:rgba(10,10,13,.58);--display:'Bebas Neue',Impact,sans-serif;--body:Inter,Arial,sans-serif;--mono:'JetBrains Mono',monospace}
+:root{--void:#050506;--ink:#0a0a0c;--ink-2:#111114;--ink-3:#1a1a1f;--line:rgba(255,255,255,.1);--line-2:rgba(255,255,255,.2);--paper:#f4f1ee;--muted:#aaa5a8;--subtle:#948f98;--red:#ff2b2b;--ruby:#c4101c;--violet:#9d8cff;--accent-rgb:255,43,43;--blue:#3f73ff;--blue-rgb:63,115,255;--glass:rgba(10,10,13,.58);--display:'Bebas Neue',Impact,sans-serif;--body:Inter,Arial,sans-serif;--mono:'JetBrains Mono',monospace}
 /* legal pages (privacy/terms) style against these names */
 :root{--black-2:var(--ink-2);--border:var(--line-2);--white:var(--paper);--gray:var(--muted);--gray-dim:var(--subtle);--red-glow:rgba(var(--accent-rgb),.35)}
 *,*::before,*::after{box-sizing:border-box}
@@ -307,6 +307,7 @@ h3{font-family:var(--display);line-height:1;letter-spacing:.015em;text-transform
 .logo-headline{display:flex;flex-wrap:wrap;align-items:center;column-gap:.22em;row-gap:.02em}
 .logo-headline .inline-mark{display:inline-block;height:.74em;width:auto;margin:0 0 0 .04em;transform:translateY(-.03em);filter:drop-shadow(0 0 22px rgba(var(--accent-rgb),.35)) drop-shadow(0 2px 12px rgba(0,0,0,.6))}
 .logo-headline .apos{margin-left:-.16em}
+.logo-headline .mark-word{display:inline-flex;align-items:center}
 .logo-headline .nowrap{white-space:nowrap}
 
 /* "Pick your door." — heavier, brighter, with a slow light sweep */
@@ -573,3 +574,143 @@ h3{font-family:var(--display);line-height:1;letter-spacing:.015em;text-transform
   .ig-link{min-height:48px}
 }
 @media(prefers-reduced-motion:reduce){[data-reveal="line"]{opacity:1;transform:none;clip-path:none}.pick,.pick::after,.cta-pulse,.cta-pulse span:last-child{animation:none}.pick{color:#fff;background:none}}
+
+/* ================= Revision pass 2 ================= */
+
+/* Header: Start a Project leads the nav as its own button */
+.header-inner>.start-link{margin-left:auto}
+.site-nav{margin-left:0}
+.start-link.header-cta{gap:10px;border-color:rgba(var(--accent-rgb),.55);color:#fff;animation:start-glow 5.5s ease-in-out infinite}
+.start-link.header-cta:hover,.start-link.header-cta:focus-visible{background:var(--paper);color:#0a0a0c;border-color:var(--paper)}
+.start-dot{width:7px;height:7px;flex:none;border-radius:50%;background:var(--red);box-shadow:0 0 10px var(--red);animation:start-blink 5.5s ease-in-out infinite}
+@keyframes start-glow{0%,100%{box-shadow:0 0 0 0 rgba(var(--accent-rgb),0)}50%{box-shadow:0 0 22px 0 rgba(var(--accent-rgb),.32)}}
+@keyframes start-blink{0%,100%{opacity:1}50%{opacity:.25}}
+.site-nav .nav-index{min-width:0}
+
+/* Bigger logos across the site */
+.brand{width:188px}
+.footer-identity img{width:270px}
+.division-logo{width:118px;height:118px}
+.creative-hero-logo{width:320px;margin-left:-32px}
+.logo-headline .inline-mark{height:.84em}
+
+/* Home: the big Start a Project box, and louder Explore / Instagram */
+.home-hero-side{display:flex;flex-direction:column;align-items:stretch;gap:22px}
+.home-hero-side .hero-description{margin:0}
+.start-box{position:relative;display:grid;grid-template-columns:1fr auto;align-items:end;gap:8px 20px;padding:24px 26px;border:1px solid rgba(var(--accent-rgb),.55);background:linear-gradient(135deg,rgba(var(--accent-rgb),.2),rgba(8,8,10,.72) 60%);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);animation:start-glow 5.5s ease-in-out infinite;transition:border-color .3s,transform .35s cubic-bezier(.2,.7,.2,1),background .3s}
+.start-box:hover,.start-box:focus-visible{border-color:#fff;transform:translateY(-3px);background:linear-gradient(135deg,rgba(var(--accent-rgb),.34),rgba(8,8,10,.72) 60%)}
+.start-box:focus-visible{outline:2px solid var(--paper);outline-offset:4px}
+.start-box-kicker{grid-column:1/-1;display:flex;align-items:center;gap:10px;color:#e8e3e6;font:500 11px/1 var(--mono);letter-spacing:.2em;text-transform:uppercase}
+.start-box-title{font:400 clamp(40px,4.4vw,68px)/.9 var(--display);text-transform:uppercase;letter-spacing:.01em;color:#fff}
+.start-box-arrow{font-size:clamp(28px,2.6vw,40px);line-height:1;color:var(--red);transition:transform .3s}
+.start-box:hover .start-box-arrow{transform:translate(4px,-4px)}
+.hero-actions{gap:12px}
+.hero-actions .button{min-height:58px;padding:14px 24px;font-size:13px;letter-spacing:.06em}
+.cta-pop{box-shadow:0 0 0 1px #fff,0 0 30px rgba(255,255,255,.18)}
+.cta-pop:hover,.cta-pop:focus-visible{box-shadow:0 0 0 1px #fff,0 0 40px rgba(var(--accent-rgb),.6)}
+.button-ig{border:1px solid rgba(var(--accent-rgb),.8);background:rgba(var(--accent-rgb),.16);color:#fff;gap:12px}
+.button-ig .ig-icon{width:19px;height:19px}
+.button-ig:hover,.button-ig:focus-visible{background:rgba(var(--accent-rgb),.32);border-color:#fff;box-shadow:0 0 34px rgba(var(--accent-rgb),.55);transform:translateY(-2px)}
+.button-ig span:last-child{transition:transform .3s}
+.button-ig:hover span:last-child{transform:translate(3px,-3px)}
+
+/* Start a Project panel */
+.start-panel{width:min(560px,calc(100% - 32px));max-height:calc(100dvh - 32px);margin:auto;padding:0;border:1px solid rgba(var(--accent-rgb),.45);background:rgba(8,8,11,.94);color:var(--paper);box-shadow:0 40px 120px -30px rgba(var(--accent-rgb),.5);overflow:auto}
+.start-panel::backdrop{background:rgba(2,2,4,.72);backdrop-filter:blur(6px)}
+.start-panel[open]{animation:start-in .45s cubic-bezier(.2,.7,.2,1)}
+@keyframes start-in{from{opacity:0;transform:translateY(16px) scale(.98)}to{opacity:1;transform:none}}
+.start-inner{position:relative;padding:34px 30px 30px}
+.start-inner .eyebrow{margin-bottom:16px}
+.start-inner h2{font-size:clamp(46px,7vw,72px);margin-bottom:10px}
+.start-lede{color:var(--muted);margin-bottom:24px}
+.start-close{position:absolute;top:14px;right:14px;width:44px;height:44px;display:grid;place-items:center;border:1px solid var(--line-2);background:transparent;color:#fff;font-size:16px}
+.start-close:hover,.start-close:focus-visible{border-color:var(--red)}
+.start-options{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.start-option{display:grid;grid-template-columns:28px 1fr auto;align-items:center;gap:14px;min-height:64px;padding:12px 16px;border:1px solid var(--line-2);background:rgba(255,255,255,.03);transition:border-color .25s,background .25s}
+.start-option strong{display:block;font-size:15px}
+.start-option small{display:block;color:var(--muted);font-size:13px;overflow-wrap:anywhere}
+.start-option .ig-icon,.start-glyph{width:22px;height:22px;display:grid;place-items:center;color:var(--red);font-size:18px}
+.start-option:hover,.start-option:focus-visible{border-color:var(--red);background:rgba(var(--accent-rgb),.1)}
+.start-option:focus-visible{outline:2px solid var(--paper);outline-offset:2px}
+.start-option-primary{border-color:rgba(var(--accent-rgb),.6);background:rgba(var(--accent-rgb),.12)}
+body.start-open{overflow:hidden}
+
+/* Creative Projects: the looping glitch video sits in the scene with no edge */
+.work-image.work-image-invert{background:transparent;border:0;box-shadow:none;overflow:visible}
+.work-image-invert video{mix-blend-mode:screen;-webkit-mask-image:linear-gradient(90deg,transparent,#000 16%,#000 84%,transparent),linear-gradient(180deg,transparent,#000 16%,#000 84%,transparent);-webkit-mask-composite:source-in;mask-image:linear-gradient(90deg,transparent,#000 16%,#000 84%,transparent),linear-gradient(180deg,transparent,#000 16%,#000 84%,transparent);mask-composite:intersect}
+.work-item:hover .work-image-invert video{transform:none}
+
+/* Long Island gear floats free: no ground glow under it */
+.services-grid .model-stage::after{display:none}
+
+/* Spotify: click-to-load card */
+.embed-shell .embed-card{min-height:352px}
+.embed-shell.is-idle .embed-loading,.embed-shell.is-idle .embed-fallback{display:none}
+.embed-shell:not(.is-idle) .embed-card{display:none}
+.embed-shell.is-loading iframe,.embed-shell.is-loaded iframe{display:block}
+.embed-note{color:var(--muted);font-size:12.5px;max-width:420px}
+.embed-note a{color:#fff;text-decoration:underline;text-decoration-color:var(--red);text-underline-offset:3px}
+.embed-shell .embed-loading{display:none}
+.embed-shell.is-loading .embed-loading{display:flex}
+
+/* Booking form consent */
+.form-consent{display:flex;align-items:flex-start;gap:12px}
+.form-consent input{flex:none;width:22px;height:22px;margin:1px 0 0;accent-color:var(--red)}
+.form-consent input:focus-visible{outline:2px solid var(--paper);outline-offset:3px}
+.form-consent input[aria-invalid="true"]{outline:2px solid #ff6b6b;outline-offset:2px}
+.form-consent label{color:#d9d4d7;font-size:13.5px;line-height:1.55}
+.form-consent a{color:#fff;text-decoration:underline;text-decoration-color:var(--red);text-underline-offset:3px}
+.form-consent label span{color:var(--red)}
+
+/* Footer: business details + legal links, low-key, every page */
+.footer-bottom{flex-wrap:wrap;row-gap:12px}
+.footer-business{margin:0;color:var(--subtle)}
+.footer-business a{color:var(--muted)}
+.footer-legal{display:flex;flex-wrap:wrap;gap:6px 22px}
+.footer-legal a{display:inline-flex;align-items:center;min-height:32px;color:var(--muted)}
+.footer-legal a:hover,.footer-legal a:focus-visible{color:#fff}
+
+/* Legal pages built by build.mjs (cookies, refunds) — same look as privacy/terms */
+.page-legal .legal-wrap{max-width:800px;margin:0 auto;padding:160px 28px 100px}
+.page-legal .legal-back{display:inline-flex;align-items:center;gap:8px;min-height:44px;font:500 .7rem var(--mono);letter-spacing:.25em;text-transform:uppercase;color:var(--muted);margin-bottom:32px}
+.page-legal .legal-back:hover{color:var(--red)}
+.page-legal .legal-kicker{display:inline-block;font:500 .7rem var(--mono);letter-spacing:.3em;color:var(--red);margin-bottom:16px}
+.page-legal .legal-title{font:400 clamp(2.5rem,6vw,4rem)/.95 var(--display);letter-spacing:.02em;margin-bottom:16px;text-transform:uppercase}
+.page-legal .legal-updated{font:500 .7rem var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--subtle);margin-bottom:32px}
+.page-legal .legal-wrap h2{font:400 1.6rem var(--display);letter-spacing:.05em;text-transform:uppercase;margin:44px 0 16px;padding-bottom:12px;border-bottom:1px solid var(--line-2);scroll-margin-top:100px}
+.page-legal .legal-wrap p,.page-legal .legal-wrap li{color:#c9c5c8;line-height:1.75;margin-bottom:12px}
+.page-legal .legal-wrap ul{list-style:none;padding:0;margin:0 0 14px}
+.page-legal .legal-wrap ul li{position:relative;padding-left:22px}
+.page-legal .legal-wrap ul li::before{content:'✕';position:absolute;left:0;top:0;color:var(--red);font-size:.8rem}
+.page-legal .legal-wrap a{color:#fff;text-decoration:underline;text-decoration-color:var(--red);text-underline-offset:3px}
+.page-legal .legal-wrap code{font:500 .85em var(--mono);color:#fff}
+.legal-draft{padding:14px 16px;border:1px dashed rgba(var(--accent-rgb),.7);background:rgba(var(--accent-rgb),.08);color:#fff!important}
+.page-legal .legal-contact{margin-top:56px;padding-top:28px;border-top:1px solid var(--line-2);font:500 .8rem/1.6 var(--mono);letter-spacing:.08em;color:var(--muted)}
+.page-legal .legal-contact p{margin:0 0 6px}
+
+/* Brooklyn: copy slots waiting on approved text */
+.copy-needed{position:relative;max-width:640px;margin-top:18px;padding:16px 18px 16px;border:1px dashed rgba(var(--accent-rgb),.75);background:rgba(var(--accent-rgb),.08)}
+.copy-needed::before{content:'COPY NEEDED';display:block;margin-bottom:8px;color:#fff;font:600 10px/1 var(--mono);letter-spacing:.2em}
+.copy-needed h3{font-size:clamp(30px,3vw,44px);margin-bottom:8px}
+.copy-needed p{color:#dfe7ff}
+
+@media(max-width:1180px){.brand{width:150px}}
+@media(max-width:900px){
+  .header-inner>.start-link{margin-left:auto}
+  .brand{width:136px}
+  .start-box{padding:20px}
+  .page-legal .legal-wrap{padding:120px 20px 80px}
+}
+@media(max-width:640px){
+  .home-hero{min-height:0;padding-top:44vh}
+  .logo-headline .mark-word{display:inline-flex;align-items:center}
+  .brand{width:124px}
+  .footer-identity img{width:230px}
+  .division-logo{width:92px;height:92px}
+  .creative-hero-logo{width:240px;margin-left:-22px}
+  .hero-actions{flex-direction:column;align-items:stretch}
+  .start-option{grid-template-columns:24px 1fr auto;padding:10px 12px}
+  .footer-bottom{align-items:flex-start;flex-direction:column}
+}
+@media(max-width:360px){.brand{width:104px}}
+@media(prefers-reduced-motion:reduce){.start-link.header-cta,.start-dot,.start-box,.start-panel[open]{animation:none}}

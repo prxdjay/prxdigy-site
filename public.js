@@ -56,14 +56,26 @@ if (results && !motionReduced.matches && 'IntersectionObserver' in window) {
   observer.observe(results);
 }
 
-// Spotify embed: branded loading state, and a plain link if the player never arrives.
-document.querySelectorAll('.embed-shell').forEach(shell => {
-  const frame = shell.querySelector('iframe');
-  if (!frame) return;
-  const ready = () => shell.classList.add('is-loaded');
-  frame.addEventListener('load', ready);
-  window.addEventListener('message', event => { if (event.origin === 'https://open.spotify.com') ready(); });
-  setTimeout(() => { if (!shell.classList.contains('is-loaded')) shell.classList.add('is-fallback'); }, 9000);
+// Spotify: click-to-load. The iframe is only created when the visitor presses the button.
+document.querySelectorAll('.embed-shell[data-embed-src]').forEach(shell => {
+  const load = shell.querySelector('.embed-load');
+  if (!load) return;
+  load.addEventListener('click', () => {
+    shell.classList.remove('is-idle');
+    shell.classList.add('is-loading');
+    const frame = document.createElement('iframe');
+    frame.title = 'PRXDIGY Studio playlist on Spotify';
+    frame.src = shell.dataset.embedSrc;
+    frame.width = '100%';
+    frame.height = '352';
+    frame.allow = 'autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture';
+    const ready = () => { shell.classList.remove('is-loading'); shell.classList.add('is-loaded'); };
+    frame.addEventListener('load', ready);
+    window.addEventListener('message', event => { if (event.origin === 'https://open.spotify.com') ready(); });
+    setTimeout(() => { if (!shell.classList.contains('is-loaded')) shell.classList.add('is-fallback'); }, 9000);
+    shell.appendChild(frame);
+    frame.focus();
+  }, { once: true });
 });
 
 // Preserve the existing Google Apps Script booking endpoint and payload.
@@ -90,9 +102,16 @@ if (form) {
         invalidNames.push(badPhone ? 'a valid phone number' : input.labels[0].textContent.replace('*', '').trim().toLowerCase());
       }
     });
+    const consent = field('consent');
+    const noConsent = consent && !consent.checked;
+    if (consent) consent.setAttribute('aria-invalid', String(noConsent));
+    if (noConsent && !firstInvalid) firstInvalid = consent;
     if (firstInvalid) {
+      const parts = [];
+      if (invalidNames.length) parts.push(`complete ${invalidNames.join(', ')}`);
+      if (noConsent) parts.push('agree to the Privacy Policy and Terms');
       errorSummary.hidden = false;
-      errorSummary.textContent = `Please complete ${invalidNames.join(', ')} before sending your request.`;
+      errorSummary.textContent = `Please ${parts.join(' and ')} before sending your request.`;
       errorSummary.focus();
       firstInvalid.focus();
       return;
@@ -201,3 +220,32 @@ document.querySelectorAll('.gallery-grid figure').forEach(tile => {
     tile.classList.toggle('is-active', on);
   });
 });
+
+// Start a Project: every "#start-project" link opens the fast-contact panel (a native dialog, so
+// focus is trapped and Esc closes it). Capture phase so smooth-scroll never grabs these links.
+const startPanel = document.getElementById('start-project');
+if (startPanel && typeof startPanel.showModal === 'function') {
+  let opener = null;
+  const open = trigger => {
+    opener = trigger || document.activeElement;
+    startPanel.showModal();
+    document.body.classList.add('start-open');
+    const first = startPanel.querySelector('.start-option');
+    if (first) first.focus();
+  };
+  const close = () => startPanel.close();
+  startPanel.addEventListener('close', () => {
+    document.body.classList.remove('start-open');
+    if (opener && opener.focus) opener.focus();
+  });
+  document.addEventListener('click', event => {
+    const link = event.target.closest('a[href$="#start-project"]');
+    if (!link) return;
+    event.preventDefault();
+    event.stopPropagation();
+    open(link);
+  }, true);
+  startPanel.querySelector('[data-start-close]').addEventListener('click', close);
+  startPanel.addEventListener('click', event => { if (event.target === startPanel) close(); });
+  if (location.hash === '#start-project') open();
+}

@@ -9,15 +9,20 @@ export const site = {
     { label: 'Creative Projects', href: '/creative-projects/' },
     { label: 'Brooklyn', href: '/studio/brooklyn/', status: 'Now open', media: null /* Brooklyn-specific photography goes here when supplied. */ },
   ],
-  // Primary navigation order, per the approved revision doc — distinct from the
-  // `destinations` order above, which still drives the homepage's 01/02/03 cards.
+  // Primary navigation order (Start a Project sits ahead of these as its own button).
   nav: [
-    { label: 'Brooklyn', href: '/studio/brooklyn/' },
     { label: 'Long Island', href: '/studio/long-island/' },
+    { label: 'Brooklyn', href: '/studio/brooklyn/' },
     { label: 'Creative Projects', href: '/creative-projects/' },
     { label: 'The Team', href: '/team/' },
-    { label: 'Contact', href: '/#contact' },
-    { label: 'T&C', href: '/terms.html' },
+  ],
+  // Business details shown in the footer and legal pages.
+  business: { name: 'PRXDIGY', location: 'Long Island, NY', email: 'prxd.jay@gmail.com' },
+  legal: [
+    { label: 'Privacy Policy', href: '/privacy.html' },
+    { label: 'Terms & Conditions', href: '/terms.html' },
+    { label: 'Cookie Policy', href: '/cookies.html' },
+    { label: 'Refund Policy', href: '/refunds.html' },
   ],
   results: [
     { value: 20, suffix: 'M+', label: 'Spotify streams generated in 2026' },

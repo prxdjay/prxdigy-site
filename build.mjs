@@ -27,10 +27,10 @@ function header(active = '') {
   <header class="site-header">
     <div class="header-inner wrap">
       <a class="brand" href="${L('/')}" aria-label="PRXDIGY home"><img src="${A}wordmark.webp" alt="PRXDIGY" width="1200" height="400"></a>
+      <a class="header-cta start-link" href="#start-project" aria-haspopup="dialog"><span class="start-dot" aria-hidden="true"></span><span class="header-cta-full">Start a Project</span><span class="header-cta-short">Start</span></a>
       <nav class="site-nav" id="primary-nav" aria-label="Primary navigation">
         ${site.nav.map((item, i) => `<a href="${L(item.href)}"${active === item.href ? ' aria-current="page"' : ''}><span class="nav-index">0${i + 1}</span>${item.label}</a>`).join('')}
       </nav>
-      <a class="header-cta" href="${L('/#contact')}" aria-label="Start a Project"><span class="header-cta-full">Start a Project</span><span class="header-cta-short" aria-hidden="true">Start</span>${arrow}</a>
       <button class="menu-toggle" type="button" aria-label="Open navigation" aria-controls="primary-nav" aria-expanded="false"><span></span><span></span></button>
     </div>
   </header>`;
@@ -43,8 +43,9 @@ function footer() {
       <nav aria-label="Footer destinations"><span class="footer-label">Explore</span>${destinations.map(item => `<a href="${L(item.href)}">${item.label}</a>`).join('')}</nav>
       <div class="footer-contact"><span class="footer-label">Connect</span><a href="${instagram}" ${ext}>Instagram ${site.instagram.label}</a><a href="${sms}">Text ${site.text.label}</a></div>
     </div>
-    <div class="wrap footer-bottom"><span>© ${new Date().getFullYear()} PRXDIGY</span><div><a href="${L('/privacy.html')}">Privacy Policy</a><a href="${L('/terms.html')}">Terms &amp; Conditions</a></div><span>Built for the work.</span></div>
-  </footer>`;
+    <div class="wrap footer-bottom"><p class="footer-business">© ${new Date().getFullYear()} ${site.business.name} · ${site.business.location} · <a href="mailto:${site.business.email}">${site.business.email}</a></p><nav class="footer-legal" aria-label="Legal">${site.legal.map(item => `<a href="${L(item.href)}">${item.label.replace('&', '&amp;')}</a>`).join('')}</nav></div>
+  </footer>
+  ${startPanel()}`;
 }
 
 // Finalized GLB models (see assets/models/README.md). Only files that exist are announced to
@@ -52,6 +53,24 @@ function footer() {
 const MODELS = ['uad-sphere', 'fuji-xh2s', 'tlm-103', 'prxdigy-x-final', 'studio-badge', 'creative-emblem', 'prxdigy-logo-3d'];
 const hasModel = name => existsSync(`assets/models/${name}.glb`);
 const modelList = MODELS.filter(hasModel).join(',');
+
+// Start a Project: the fast-contact panel every "Start a Project" link opens.
+function startPanel() {
+  return `<dialog class="start-panel" id="start-project" aria-labelledby="start-title">
+    <div class="start-inner">
+      <button class="start-close" type="button" data-start-close aria-label="Close Start a Project">✕</button>
+      <p class="eyebrow"><span class="eyebrow-line"></span>Fast contact</p>
+      <h2 id="start-title">Start a Project</h2>
+      <p class="start-lede">Pick the fastest way to reach PRXDIGY.</p>
+      <ul class="start-options" role="list">
+        <li><a class="start-option start-option-primary" href="${instagram}" ${ext}>${igIcon}<span><strong>DM on Instagram</strong><small>${site.instagram.label}</small></span>${arrow}</a></li>
+        <li><a class="start-option" href="${sms}"><span class="start-glyph" aria-hidden="true">✆</span><span><strong>Text us</strong><small>${site.text.label}</small></span>${arrow}</a></li>
+        <li><a class="start-option" href="mailto:${site.business.email}?subject=New%20project"><span class="start-glyph" aria-hidden="true">@</span><span><strong>Email</strong><small>${site.business.email}</small></span>${arrow}</a></li>
+        <li><a class="start-option" href="${L('/studio/long-island/#book')}"><span class="start-glyph" aria-hidden="true">●</span><span><strong>Book the Long Island room</strong><small>Apply to book a session</small></span>${arrow}</a></li>
+      </ul>
+    </div>
+  </dialog>`;
+}
 
 // The 3D world: one fixed canvas behind the page, plus the script chain world.js needs.
 const V = `${ROOT}assets/vendor/`;
@@ -61,6 +80,7 @@ const worldScripts = ['three/three.min.js', 'three/GLTFLoader.js', 'three/meshop
   'lenis/lenis.min.js'].map(src => `<script src="${V}${src}" defer></script>`).join('');
 
 function page({ title, description, path, og, active, body, className = '', world = 'lost', schema = '' }) {
+  const scene = world !== null;
   const url = `${site.origin}${path}`;
   return `<!doctype html>
 <html lang="en"><head>
@@ -72,10 +92,10 @@ function page({ title, description, path, og, active, body, className = '', worl
   <link rel="icon" href="${ROOT}assets/favicon.ico"><link rel="apple-touch-icon" href="${ROOT}assets/apple-touch-icon.png">
   <link rel="preload" href="${ROOT}assets/fonts/bebas-neue-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="${ROOT}public.css">
-  ${PREVIEW ? '<script>window.PRX_PREVIEW = true;</script>' : ''}${worldScripts}<script src="${ROOT}world.js" defer></script><script src="${ROOT}public.js" defer></script>
+  ${scene ? `${PREVIEW ? '<script>window.PRX_PREVIEW = true;</script>' : ''}${worldScripts}<script src="${ROOT}world.js" defer></script>` : ''}<script src="${ROOT}public.js" defer></script>
 ${schema ? `  <script type="application/ld+json">${schema}</script>` : ''}
-</head><body class="${className}" data-world="${world}" data-assets="${ROOT}assets/" data-models="${modelList}">
-  <div class="world-backdrop" aria-hidden="true"></div><canvas class="world-canvas" aria-hidden="true"></canvas><div class="world-grain" aria-hidden="true"></div>
+</head><body class="${className}"${scene ? ` data-world="${world}" data-assets="${ROOT}assets/" data-models="${modelList}"` : ''}>
+  <div class="world-backdrop" aria-hidden="true"></div>${scene ? '<canvas class="world-canvas" aria-hidden="true"></canvas>' : ''}<div class="world-grain" aria-hidden="true"></div>
   ${header(active)}<main id="main">${body}</main>${footer()}<div class="page-wipe" aria-hidden="true"></div></body></html>\n`;
 }
 
@@ -115,8 +135,8 @@ const home = page({
     <img class="hero-mark" src="${A}wordmark.webp" alt="" width="1200" height="400" fetchpriority="high">
     <div class="hud hud-top wrap" aria-hidden="true"><span>PRXDIGY / New York</span><span>Long Island — Brooklyn</span></div>
     <div class="wrap home-hero-grid">
-      <div><p class="eyebrow"><span class="eyebrow-line"></span>One creative company / New York</p><h1 class="glitch-title logo-headline">Where <img class="inline-mark" src="${A}wordmark-tight.webp" alt="PRXDIGY" width="1027" height="246"><span class="apos">’s</span> <span class="nowrap">are <em>made.</em></span></h1></div>
-      <div class="home-hero-side"><p class="hero-description">One creative company built to move artists, brands, and ideas forward.</p><div class="action-row"><a class="button button-light cta-pulse" href="#destinations">Explore PRXDIGY ${down}</a>${igLink('DM on Instagram')}</div></div>
+      <div><p class="eyebrow"><span class="eyebrow-line"></span>One creative company / New York</p><h1 class="glitch-title logo-headline">Where <span class="nowrap mark-word"><img class="inline-mark" src="${A}wordmark-tight.webp" alt="PRXDIGY" width="1027" height="246"><span class="apos">’s</span></span> <span class="nowrap">are <em>made.</em></span></h1></div>
+      <div class="home-hero-side"><p class="hero-description">One creative company built to move artists, brands, and ideas forward.</p><a class="start-box start-link" href="#start-project" aria-haspopup="dialog"><span class="start-box-kicker"><span class="start-dot" aria-hidden="true"></span>Fast contact</span><span class="start-box-title">Start a Project</span><span class="start-box-arrow" aria-hidden="true">↗</span></a><div class="action-row hero-actions"><a class="button button-light cta-pop" href="#destinations">Explore PRXDIGY ${down}</a>${igLink('DM on Instagram').replace('class="text-link ig-link"', 'class="button button-ig ig-link"')}</div></div>
     </div>
     <div class="scroll-cue" aria-hidden="true"><span></span>Scroll to descend</div>
   </section>
@@ -130,8 +150,7 @@ const home = page({
       <a class="destination destination-brooklyn" href="${L(destinations[2].href)}" data-reveal><div class="destination-image">${img('v2/bk-desk-x-blue.webp', 'The Brooklyn desk under the glowing blue X', 1086, 1448, 'loading="lazy" decoding="async"', '(max-width: 700px) 100vw, 33vw')}</div><div class="destination-content"><span class="destination-index">03 / PRXDIGY Studio</span><span class="status status-blue">${destinations[2].status}</span><h3>Brooklyn</h3><p>A new PRXDIGY studio location. Full location details are on the way.</p><span class="destination-action">Brooklyn Information ${arrow}</span></div></a>
     </div></div></section>
   <section class="reel" aria-label="Inside the PRXDIGY rooms"><div class="reel-track">${reelItems(false)}${reelItems(true)}</div></section>
-  <section class="beat section brand-statement" data-beat="statement"><div class="wrap statement-grid"><div class="panel">${eyebrow('02 / The company')}<h2 data-reveal="glitch">From the first take<br>to the <em>public release.</em></h2><div class="statement-columns" data-reveal><p><strong>PRXDIGY</strong> is the umbrella for the work.</p><p><strong>Studio</strong> is where records and content are physically made.</p><p><strong>Creative Projects</strong> builds strategy, campaigns, growth, and the larger creative system around them.</p></div></div></div></section>
-  <section class="beat section contact-section" id="contact" data-beat="contact"><div class="wrap contact-grid"><div class="panel">${eyebrow("03 / Let's talk")}<h2 data-reveal="glitch">Not sure where your<br>project <em>belongs?</em></h2><p class="contact-lede" data-reveal>Tell us what you're building. We'll point you in the right direction.</p>${contactActions()}</div></div></section>`
+  <section class="beat section brand-statement" data-beat="statement"><div class="wrap statement-grid"><div class="panel">${eyebrow('02 / The company')}<h2 data-reveal="glitch">From the first take<br>to the <em>public release.</em></h2><div class="statement-columns" data-reveal><p><strong>PRXDIGY</strong> is the umbrella for the work.</p><p><strong>Studio</strong> is where records and content are physically made.</p><p><strong>Creative Projects</strong> builds strategy, campaigns, growth, and the larger creative system around them.</p></div></div></div></section>`
 });
 
 // ---------- Long Island ----------
@@ -155,9 +174,10 @@ const gallery = [
 const liGear = hasModel('uad-sphere') || hasModel('fuji-xh2s');
 const playlistUrl = 'https://open.spotify.com/playlist/1gKUydEemsUPCpqJVEd2NQ';
 // The preview host blocks third-party iframes, so the shared preview shows a card instead.
-const spotify = PREVIEW
-  ? `<div class="spotify-frame glass" data-reveal><div class="embed-card"><p class="kicker">Spotify / Playlist</p><strong>PRXDIGY Studio</strong><a class="button button-light" href="${playlistUrl}" ${ext}>Open the playlist on Spotify ${arrow}</a></div></div>`
-  : `<div data-reveal><div class="spotify-frame glass embed-shell"><div class="embed-loading" aria-hidden="true"><span class="embed-spinner"></span><span>Loading playlist</span></div><iframe title="PRXDIGY Studio playlist on Spotify" src="https://open.spotify.com/embed/playlist/1gKUydEemsUPCpqJVEd2NQ?utm_source=generator&amp;theme=0" width="100%" height="352" loading="lazy" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe><a class="embed-fallback" href="${playlistUrl}" ${ext}>Open the playlist on Spotify ${arrow}</a></div><a class="embed-link" href="${playlistUrl}" ${ext}>Open in Spotify ${arrow}</a></div>`;
+const spotifyEmbed = 'https://open.spotify.com/embed/playlist/1gKUydEemsUPCpqJVEd2NQ?utm_source=generator&amp;theme=0';
+// Click-to-load: nothing from Spotify (and none of its cookies) loads until the visitor asks for
+// the player. The preview host blocks third-party frames, so previews only offer the link.
+const spotify = `<div data-reveal><div class="spotify-frame glass embed-shell${PREVIEW ? '' : ' is-idle'}"${PREVIEW ? '' : ` data-embed-src="${spotifyEmbed}"`}><div class="embed-card"><p class="kicker">Spotify / Playlist</p><strong>PRXDIGY Studio</strong><div class="action-row">${PREVIEW ? '' : `<button class="button button-light embed-load" type="button">Load Spotify player ${arrow.replace('↗', '▶')}</button>`}<a class="button button-outline" href="${playlistUrl}" ${ext}>Open in Spotify ${arrow}</a></div>${PREVIEW ? '' : `<p class="embed-note">Loading the player connects to Spotify, which may set its own cookies. <a href="${L('/cookies.html')}">Cookie Policy</a></p>`}</div><a class="embed-fallback" href="${playlistUrl}" ${ext}>Open the playlist on Spotify ${arrow}</a></div></div>`;
 
 const longIsland = page({
   title: 'PRXDIGY Studio Long Island — Recording, Mixing & Production',
@@ -168,7 +188,7 @@ const longIsland = page({
   <section class="beat section room-gallery" data-beat="gallery"><div class="wrap"><div class="section-heading">${eyebrow('02 / Inside the room')}<h2 data-reveal="glitch">Where the records<br><em>get made.</em></h2><p data-reveal>Real details from the Long Island studio.</p></div><div class="gallery-grid">${gallery.map(([file, alt, w, h, cap, cls]) => `<figure class="${cls}" data-reveal tabindex="0">${img(file, alt, w, h)}${cap ? `<figcaption>${cap}</figcaption>` : ''}</figure>`).join('')}</div></div></section>
   <section class="beat section services-section" data-beat="services"><div class="wrap services-grid${liGear ? ' has-stage' : ''}"><div><div class="section-heading">${eyebrow('03 / What we do')}<h2 data-reveal="glitch">Every part of<br><em>the record.</em></h2><p data-reveal>From the first idea to the final detail.</p></div><div class="service-list">${studioServices.map(([name, description], i) => `<div class="service-row" data-reveal><span>${String(i + 1).padStart(2, '0')}</span><h3>${name}</h3><p>${description}</p></div>`).join('')}</div></div>${liGear ? '<div class="model-stage model-stage-tall" data-anchor="li-gear" aria-hidden="true"></div>' : ''}</div></section>
   <section class="beat section room-story" data-beat="story"><div class="wrap story-grid"><div class="story-image" data-reveal>${img('v2/li-cloud-ceiling.webp', 'Red cloud ceiling with glowing light running through it', 1700, 925)}</div><div class="story-copy">${eyebrow('04 / The atmosphere')}<h2 data-reveal="glitch">The room sets the scene.<br>We set the <em>vibe.</em></h2><p data-reveal>The starlight ceiling and red glow make it easy to settle in, but the people make the session. We lock in with you, bounce ideas around, and bring the right energy to every record.</p><div data-reveal>${img('lifted/studio-astronaut-lifted.webp', 'Astronaut figure on the red-lit desk', 1600, 838)}</div></div></div></section>
-  <section class="beat section booking-section" id="book" data-beat="book"><div class="wrap booking-grid"><div class="booking-intro">${eyebrow('05 / Book the room')}<h2 data-reveal="glitch">Ready to<br><em>lock in?</em></h2><p>Tell us what you're building. If it fits, we'll reach out to plan the session.</p><p class="booking-note">Prefer to talk first? <a href="${sms}">Text PRXDIGY</a> or <a href="${instagram}" ${ext}>DM on Instagram</a>.</p></div><div class="booking-panel glass"><form id="intakeForm" novalidate><div class="form-error-summary" id="formErrors" role="alert" tabindex="-1" hidden></div><div class="form-field"><label for="name">Name <span aria-hidden="true">*</span></label><input id="name" name="name" type="text" autocomplete="name" required></div><div class="form-pair"><div class="form-field"><label for="phone">Phone <span aria-hidden="true">*</span></label><input id="phone" name="phone" type="tel" autocomplete="tel" required></div><div class="form-field"><label for="instagram">Instagram</label><input id="instagram" name="instagram" type="text" placeholder="@" autocomplete="off"></div></div><div class="form-field"><label for="project">What are you working on? <span aria-hidden="true">*</span></label><textarea id="project" name="project" rows="4" required></textarea></div><div class="form-pair"><div class="form-field"><label for="budget">Budget range <span aria-hidden="true">*</span></label><select id="budget" name="budget" required><option value="">Select a range</option><option value="under-500">Under $500</option><option value="500-1500">$500 – $1,500</option><option value="1500-5000">$1,500 – $5,000</option><option value="5000-plus">$5,000+</option></select></div><div class="form-field"><label for="package">Package interest <span aria-hidden="true">*</span></label><select id="package" name="package" required><option value="">Select an area</option><option value="recording">Recording Session</option><option value="mix-master">Mix &amp; Master</option><option value="beats">Beat Production</option><option value="content">Content / Reels</option><option value="creative">Creative Direction</option><option value="songwriting">Songwriting</option><option value="full">Full Rollout</option></select></div></div><div class="form-field"><label for="timeframe">Timeframe <span aria-hidden="true">*</span></label><select id="timeframe" name="timeframe" required><option value="">Select a timeframe</option><option value="asap">ASAP — this week</option><option value="2-weeks">Next 2 weeks</option><option value="month">Within a month</option><option value="flexible">Flexible</option></select></div><button class="button button-light form-submit" type="submit">Apply to Book ${arrow}</button><p class="form-disclaimer">By submitting this form, you agree to receive text messages from PRXDIGY STUDIO regarding your booking. Message &amp; data rates may apply. Reply STOP to opt out. See our <a href="${L('/privacy.html')}">Privacy Policy</a> and <a href="${L('/terms.html')}">Terms &amp; Conditions</a>.</p></form><div class="form-success" id="formSuccess" role="status" tabindex="-1" hidden><span aria-hidden="true">✓</span><h3>Request received.</h3><p>We'll reach out shortly if it's a fit. For a faster response, <a href="${sms}">text ${site.text.label}</a>.</p></div></div></div></section>`
+  <section class="beat section booking-section" id="book" data-beat="book"><div class="wrap booking-grid"><div class="booking-intro">${eyebrow('05 / Book the room')}<h2 data-reveal="glitch">Ready to<br><em>lock in?</em></h2><p>Tell us what you're building. If it fits, we'll reach out to plan the session.</p><p class="booking-note">Prefer to talk first? <a href="${sms}">Text PRXDIGY</a> or <a href="${instagram}" ${ext}>DM on Instagram</a>.</p></div><div class="booking-panel glass"><form id="intakeForm" novalidate><div class="form-error-summary" id="formErrors" role="alert" tabindex="-1" hidden></div><div class="form-field"><label for="name">Name <span aria-hidden="true">*</span></label><input id="name" name="name" type="text" autocomplete="name" required></div><div class="form-pair"><div class="form-field"><label for="phone">Phone <span aria-hidden="true">*</span></label><input id="phone" name="phone" type="tel" autocomplete="tel" required></div><div class="form-field"><label for="instagram">Instagram</label><input id="instagram" name="instagram" type="text" placeholder="@" autocomplete="off"></div></div><div class="form-field"><label for="project">What are you working on? <span aria-hidden="true">*</span></label><textarea id="project" name="project" rows="4" required></textarea></div><div class="form-pair"><div class="form-field"><label for="budget">Budget range <span aria-hidden="true">*</span></label><select id="budget" name="budget" required><option value="">Select a range</option><option value="under-500">Under $500</option><option value="500-1500">$500 – $1,500</option><option value="1500-5000">$1,500 – $5,000</option><option value="5000-plus">$5,000+</option></select></div><div class="form-field"><label for="package">Package interest <span aria-hidden="true">*</span></label><select id="package" name="package" required><option value="">Select an area</option><option value="recording">Recording Session</option><option value="mix-master">Mix &amp; Master</option><option value="beats">Beat Production</option><option value="content">Content / Reels</option><option value="creative">Creative Direction</option><option value="songwriting">Songwriting</option><option value="full">Full Rollout</option></select></div></div><div class="form-field"><label for="timeframe">Timeframe <span aria-hidden="true">*</span></label><select id="timeframe" name="timeframe" required><option value="">Select a timeframe</option><option value="asap">ASAP — this week</option><option value="2-weeks">Next 2 weeks</option><option value="month">Within a month</option><option value="flexible">Flexible</option></select></div><div class="form-consent"><input id="consent" name="consent" type="checkbox" required><label for="consent">I agree to the <a href="${L('/privacy.html')}">Privacy Policy</a> and <a href="${L('/terms.html')}">Terms &amp; Conditions</a>. <span aria-hidden="true">*</span></label></div><button class="button button-light form-submit" type="submit">Apply to Book ${arrow}</button><p class="form-disclaimer">By submitting this form, you agree to receive text messages from PRXDIGY STUDIO regarding your booking. Message &amp; data rates may apply. Reply STOP to opt out. See our <a href="${L('/privacy.html')}">Privacy Policy</a> and <a href="${L('/terms.html')}">Terms &amp; Conditions</a>.</p></form><div class="form-success" id="formSuccess" role="status" tabindex="-1" hidden><span aria-hidden="true">✓</span><h3>Request received.</h3><p>We'll reach out shortly if it's a fit. For a faster response, <a href="${sms}">text ${site.text.label}</a>.</p></div></div></div></section>`
 });
 
 // ---------- Creative Projects ----------
@@ -207,9 +227,10 @@ const brooklyn = page({
   description: 'PRXDIGY Studio Brooklyn is now open. Reach out for sessions, availability, and location information while the full location page is being documented.',
   path: '/studio/brooklyn/', og: 'og-brooklyn.jpg', active: destinations[2].href, className: 'page-brooklyn', world: 'brooklyn',
   body: `<section class="beat division-hero brooklyn-hero" data-beat="hero"><div class="wrap division-hero-grid"><div class="division-hero-copy"><img class="division-logo" src="${A}studio-logo-alpha.webp" alt="PRXDIGY Studio" width="650" height="650"><p class="eyebrow"><span class="status status-blue">${destinations[2].status}</span> / Brooklyn</p><h1 class="stack hero-stack">${lines('Brooklyn is where you make it.', 'Everywhere is where it goes.')}</h1><p class="hero-description">For sessions, availability, and location information, reach out directly.</p><div class="action-row"><a class="button button-light" href="${instagram}" ${ext}>DM ${site.instagram.label}${arrow}</a><a class="button button-outline" href="${sms}">Text ${site.text.label}${arrow}</a></div><p class="brooklyn-note">Full location page in progress.</p></div></div></section>
-  <section class="beat section bk-installation" data-beat="installation"><div class="wrap bk-feature-grid"><div class="section-heading">${eyebrow('01 / The room')}</div><figure class="bk-feature" data-reveal>${img('v2/bk-desk-x-blue.webp', 'The Brooklyn desk under the glowing cloud X', 1086, 1448, 'loading="lazy" decoding="async"', '(max-width: 700px) 100vw, 40vw')}<figcaption>Brooklyn / The X</figcaption></figure><figure class="bk-feature bk-feature-alt" data-reveal>${img('v2/bk-hallway-blue.webp', 'The blue-lit hallway into the Brooklyn studio', 1086, 1448, 'loading="lazy" decoding="async"', '(max-width: 700px) 100vw, 30vw')}<figcaption>Brooklyn / The way in</figcaption></figure></div></section>
-  <section class="beat section room-gallery bk-gallery" data-beat="room"><div class="wrap"><div class="section-heading">${eyebrow('02 / Inside Brooklyn')}</div><div class="gallery-grid">${bkGallery.map(([file, alt, w, h, cls]) => `<figure class="${cls}" data-reveal tabindex="0">${img(file, alt, w, h)}</figure>`).join('')}</div></div></section>
-  ${hasModel('tlm-103') ? `<section class="beat section bk-gear" data-beat="detail"><div class="wrap bk-gear-grid"><div class="model-stage model-stage-tall" data-anchor="bk-mic" aria-hidden="true"></div><div class="section-heading">${eyebrow('03 / On the mic')}</div></div></section>` : ''}
+  <section class="beat section bk-installation" data-beat="installation"><div class="wrap bk-feature-grid"><div class="section-heading">${eyebrow('01 / The room')}<div class="copy-needed" data-reveal><h3>[Headline for the Brooklyn room]</h3><p>[Placeholder — 2–3 sentences on the room: the cloud X, the booth, the blue light, and what it feels like to record here.]</p></div></div><figure class="bk-feature" data-reveal>${img('v2/bk-desk-x-blue.webp', 'The Brooklyn desk under the glowing cloud X', 1086, 1448, 'loading="lazy" decoding="async"', '(max-width: 700px) 100vw, 40vw')}<figcaption>Brooklyn / The X</figcaption></figure><figure class="bk-feature bk-feature-alt" data-reveal>${img('v2/bk-hallway-blue.webp', 'The blue-lit hallway into the Brooklyn studio', 1086, 1448, 'loading="lazy" decoding="async"', '(max-width: 700px) 100vw, 30vw')}<figcaption>Brooklyn / The way in</figcaption></figure></div></section>
+  <section class="beat section room-gallery bk-gallery" data-beat="room"><div class="wrap"><div class="section-heading">${eyebrow('02 / Inside Brooklyn')}<div class="copy-needed" data-reveal><p>[Placeholder — one line introducing the photos.]</p></div></div><div class="gallery-grid">${bkGallery.map(([file, alt, w, h, cls]) => `<figure class="${cls}" data-reveal tabindex="0">${img(file, alt, w, h)}</figure>`).join('')}</div></div></section>
+  ${hasModel('tlm-103') ? `<section class="beat section bk-gear" data-beat="detail"><div class="wrap bk-gear-grid"><div class="model-stage model-stage-tall" data-anchor="bk-mic" aria-hidden="true"></div><div class="section-heading">${eyebrow('03 / On the mic')}<div class="copy-needed" data-reveal><h3>[Headline about the vocal chain]</h3><p>[Placeholder — 1–2 sentences on the Neumann TLM 103 and the rest of the Brooklyn setup.]</p></div></div></div></section>` : ''}
+  <section class="section bk-services"><div class="wrap"><div class="section-heading">${eyebrow('04 / What we do in Brooklyn')}<div class="copy-needed" data-reveal><h3>[Headline for Brooklyn services]</h3><p>[Placeholder — list the services offered in Brooklyn (or confirm they match Long Island), plus how to book: form, DM, or text.]</p></div></div></div></section>
   <section class="beat bk-links" data-beat="links"><div class="wrap brooklyn-next"><p>Explore another part of PRXDIGY</p><a href="${L(destinations[0].href)}">Explore Long Island ${arrow}</a><a href="${L(destinations[1].href)}">Explore Creative Projects ${arrow}</a></div></section>`
 });
 
@@ -224,6 +245,79 @@ const team = page({
   <section class="beat section team-section" data-beat="members"><div class="wrap"><ul class="team-grid" role="list">${teamSlots.map(n => `<li class="team-card" data-reveal style="--i:${n - 1}"><article aria-label="Team member ${n} (profile pending)"><div class="team-portrait"><span class="team-portrait-index" aria-hidden="true">0${n}</span><span class="team-portrait-label">Portrait — pending</span></div><div class="team-copy"><h2 class="team-name">[ Name ]</h2><p class="team-role">[ Role / title ]</p><p class="team-bio">[ Short biography — pending approved copy ]</p><div class="team-links"><span class="team-link-slot">[ Social link ]</span><span class="team-link-slot">[ Contact link ]</span></div></div></article></li>`).join('')}</ul></div></section>`
 });
 
+// ---------- Cookie + Refund policies ----------
+// DRAFTS written from the existing Terms and from what the site actually does. The review
+// note at the top of each page comes off once the owner approves the wording.
+const legalShell = ({ kicker, heading, updated, body, source = 'the existing Terms &amp; Conditions' }) => `<div class="legal-wrap">
+  <a href="${L('/')}" class="legal-back">← Back to site</a>
+  <span class="legal-kicker">${kicker}</span>
+  <h1 class="legal-title">${heading}</h1>
+  <p class="legal-updated">Last updated: ${updated}</p>
+  <p class="legal-draft" role="note"><strong>Draft for owner review.</strong> This page was drafted from ${source} and should be checked before launch.</p>
+  ${body}
+  <div class="legal-contact"><p>Questions? Contact ${site.business.name}</p><p>${site.business.location}</p><p>Email: <a href="mailto:${site.business.email}">${site.business.email}</a></p><p>Text: <a href="${sms}">${site.text.label}</a></p></div>
+</div>`;
+
+const cookies = page({
+  title: 'Cookie Policy — PRXDIGY', description: 'How the PRXDIGY website uses cookies and similar technologies.',
+  path: '/cookies.html', og: 'og-home.jpg', className: 'page-legal', world: null,
+  body: legalShell({ kicker: '// LEGAL_03', heading: 'Cookie Policy', updated: 'September 2026', source: 'an audit of what the site loads today', body: `
+  <p>This Cookie Policy explains how the PRXDIGY website (prxdigystudio.com) uses cookies and similar technologies such as local storage.</p>
+  <h2 id="summary">The short version</h2>
+  <ul>
+    <li>Our public pages do <strong>not</strong> set cookies.</li>
+    <li>We do not use analytics, advertising, or tracking pixels.</li>
+    <li>The Spotify player on the Long Island page only loads after you choose to load it. Once loaded, Spotify may set its own cookies.</li>
+  </ul>
+  <h2 id="what">What cookies are</h2>
+  <p>Cookies are small text files a website stores in your browser. Similar technologies, like local storage, keep information on your device in the same way.</p>
+  <h2 id="ours">What we use</h2>
+  <p>Our public pages store nothing on your device. Fonts, images, video, and 3D models are served from our own site, so loading a page does not send your information to font or media providers.</p>
+  <p>The private staff portal (<code>/portal/</code>) uses storage that is strictly necessary to keep staff signed in. It is not used by visitors.</p>
+  <h2 id="third-party">Third-party services</h2>
+  <ul>
+    <li><strong>Spotify.</strong> The playlist player on the Long Island page is off until you press “Load Spotify player.” After that, Spotify’s <a href="https://www.spotify.com/legal/cookies-policy/" target="_blank" rel="noopener noreferrer">cookie policy</a> applies to the player.</li>
+    <li><strong>Booking form.</strong> When you apply to book, your answers are sent to a Google Apps Script we use to receive requests. The form does not set cookies.</li>
+    <li><strong>Links to Instagram, text, and email.</strong> These open other apps or sites, which have their own policies.</li>
+    <li><strong>Hosting.</strong> The site is hosted on GitHub Pages, which may keep technical logs (such as IP addresses) for security. See <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener noreferrer">GitHub’s privacy statement</a>.</li>
+  </ul>
+  <h2 id="choices">Your choices</h2>
+  <p>You can block or delete cookies in your browser settings. Because our pages do not rely on cookies, the site works the same with them blocked; only the Spotify player may not load.</p>
+  <h2 id="changes">Changes</h2>
+  <p>If we add analytics or other cookies in the future, we will update this page and ask for your consent where the law requires it.</p>` }),
+});
+
+const refunds = page({
+  title: 'Refund Policy — PRXDIGY', description: 'Refunds, deposits, and cancellations for PRXDIGY studio sessions, beat licenses, and creative projects.',
+  path: '/refunds.html', og: 'og-home.jpg', className: 'page-legal', world: null,
+  body: legalShell({ kicker: '// LEGAL_04', heading: 'Refund Policy', updated: 'September 2026', body: `
+  <p>This Refund Policy covers studio sessions, beat licenses, and creative project deposits purchased from ${site.business.name}. It works alongside our <a href="${L('/terms.html')}">Terms &amp; Conditions</a>.</p>
+  <h2 id="sessions">Studio sessions</h2>
+  <ul>
+    <li>A <strong>non-refundable deposit</strong> is required to lock in a session. The deposit is applied to your session total.</li>
+    <li>You can reschedule if you tell us at least <strong>48 hours</strong> before your session. Less notice may forfeit the deposit.</li>
+    <li>No-shows forfeit the deposit and any remaining session credit.</li>
+    <li>Late arrivals shorten the session; the end time does not move.</li>
+    <li>If ${site.business.name} has to cancel (for example, an equipment failure or emergency), you can choose a new time or a refund of what you paid for that session.</li>
+  </ul>
+  <h2 id="beats">Beat licenses</h2>
+  <ul>
+    <li>Beats are digital files delivered right after purchase, so <strong>license sales are final</strong>.</li>
+    <li>If a file is missing, corrupted, or you were charged twice, contact us within <strong>14 days</strong> and we will send a working file or refund the duplicate charge.</li>
+    <li>Exclusive licenses and custom production follow the terms in your written agreement.</li>
+  </ul>
+  <h2 id="projects">Creative project deposits</h2>
+  <ul>
+    <li>Creative projects start with a deposit that reserves our time and covers planning and pre-production. Deposits are <strong>non-refundable once work has begun</strong>.</li>
+    <li>Payments for work already delivered or completed are non-refundable.</li>
+    <li>If ${site.business.name} cannot deliver the agreed work, we will refund the unearned portion of what you paid.</li>
+  </ul>
+  <h2 id="mixing">Mixing and mastering</h2>
+  <p>Packages include up to 2 rounds of revisions within 14 days of delivery, as described in our Terms. Dissatisfaction after the included revisions is handled with additional paid revisions rather than refunds.</p>
+  <h2 id="how">How to request a refund</h2>
+  <p>Email <a href="mailto:${site.business.email}">${site.business.email}</a> or text ${site.text.label} with your name, the date of purchase, and what went wrong. We reply within 5 business days. Approved refunds go back to the original payment method.</p>` }),
+});
+
 const notFound = page({
   title: 'Page Not Found — PRXDIGY', description: 'This PRXDIGY page could not be found. Explore our studios and Creative Projects.', path: '/404.html', og: 'og-home.jpg', className: 'page-404', world: 'lost',
   body: `<section class="beat not-found" data-beat="hero"><div class="wrap"><p class="eyebrow"><span class="eyebrow-line"></span>404 / Page not found</p><h1 class="glitch-title">Wrong turn.<br><em>Right company.</em></h1><p>That page isn't here. Find the part of PRXDIGY you need.</p><div class="action-row"><a class="button button-light" href="${L('/')}">Back to PRXDIGY ${arrow}</a><a class="text-link" href="${L(destinations[0].href)}">Explore Long Island ${arrow}</a></div></div></section>`
@@ -231,15 +325,17 @@ const notFound = page({
 
 const out = PREVIEW ? PREVIEW.replace(/\/$/, '') + '/' : '';
 const files = PREVIEW ? [
-  ['index.html', home], ['long-island.html', longIsland], ['creative-projects.html', creative], ['brooklyn.html', brooklyn], ['team.html', team], ['404.html', notFound],
+  ['index.html', home], ['long-island.html', longIsland], ['creative-projects.html', creative], ['brooklyn.html', brooklyn], ['team.html', team], ['cookies.html', cookies], ['refunds.html', refunds], ['404.html', notFound],
 ] : [
   ['index.html', home],
   ['studio/long-island/index.html', longIsland],
   ['creative-projects/index.html', creative],
   ['studio/brooklyn/index.html', brooklyn],
   ['team/index.html', team],
+  ['cookies.html', cookies],
+  ['refunds.html', refunds],
   ['404.html', notFound],
-  ['sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${['/', ...destinations.map(item => item.href), '/team/', '/terms.html', '/privacy.html'].map(path => `<url><loc>${site.origin}${path}</loc></url>`).join('')}</urlset>\n`],
+  ['sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${['/', ...destinations.map(item => item.href), '/team/', '/terms.html', '/privacy.html', '/cookies.html', '/refunds.html'].map(path => `<url><loc>${site.origin}${path}</loc></url>`).join('')}</urlset>\n`],
   ['robots.txt', `User-agent: *\nAllow: /\nDisallow: /portal/\nSitemap: ${site.origin}/sitemap.xml\n`],
 ];
 for (const [name, contents] of files) {

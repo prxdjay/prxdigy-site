@@ -11,9 +11,6 @@
 <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png">
 <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
 <meta name="theme-color" content="#000000">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/public.css">
 <style>
   /* Legal page styles — inline to avoid touching main stylesheet */
@@ -109,10 +106,10 @@
   <header class="site-header">
     <div class="header-inner wrap">
       <a class="brand" href="/" aria-label="PRXDIGY home"><img src="/assets/public/wordmark.webp" alt="PRXDIGY" width="1200" height="400"></a>
+      <a class="header-cta start-link" href="#start-project" aria-haspopup="dialog"><span class="start-dot" aria-hidden="true"></span><span class="header-cta-full">Start a Project</span><span class="header-cta-short">Start</span></a>
       <nav class="site-nav" id="primary-nav" aria-label="Primary navigation">
-        <a href="/studio/brooklyn/"><span class="nav-index">01</span>Brooklyn</a><a href="/studio/long-island/"><span class="nav-index">02</span>Long Island</a><a href="/creative-projects/"><span class="nav-index">03</span>Creative Projects</a><a href="/team/"><span class="nav-index">04</span>The Team</a><a href="/#contact"><span class="nav-index">05</span>Contact</a><a href="/terms.html" aria-current="page"><span class="nav-index">06</span>T&C</a>
+        <a href="/studio/long-island/"><span class="nav-index">01</span>Long Island</a><a href="/studio/brooklyn/"><span class="nav-index">02</span>Brooklyn</a><a href="/creative-projects/"><span class="nav-index">03</span>Creative Projects</a><a href="/team/"><span class="nav-index">04</span>The Team</a>
       </nav>
-      <a class="header-cta" href="/#contact" aria-label="Start a Project"><span class="header-cta-full">Start a Project</span><span class="header-cta-short" aria-hidden="true">Start</span><span aria-hidden="true">↗</span></a>
       <button class="menu-toggle" type="button" aria-label="Open navigation" aria-controls="primary-nav" aria-expanded="false"><span></span><span></span></button>
     </div>
   </header>
@@ -201,8 +198,22 @@
       <nav aria-label="Footer destinations"><span class="footer-label">Explore</span><a href="/studio/long-island/">Long Island</a><a href="/creative-projects/">Creative Projects</a><a href="/studio/brooklyn/">Brooklyn</a></nav>
       <div class="footer-contact"><span class="footer-label">Connect</span><a href="https://instagram.com/prxdigystudio" target="_blank" rel="noopener noreferrer">Instagram @prxdigystudio</a><a href="sms:+16318709243">Text 631-870-9243</a></div>
     </div>
-    <div class="wrap footer-bottom"><span>© 2026 PRXDIGY</span><div><a href="/privacy.html">Privacy Policy</a><a href="/terms.html">Terms &amp; Conditions</a></div><span>Built for the work.</span></div>
+    <div class="wrap footer-bottom"><p class="footer-business">© 2026 PRXDIGY · Long Island, NY · <a href="mailto:prxd.jay@gmail.com">prxd.jay@gmail.com</a></p><nav class="footer-legal" aria-label="Legal"><a href="/privacy.html">Privacy Policy</a><a href="/terms.html">Terms &amp; Conditions</a><a href="/cookies.html">Cookie Policy</a><a href="/refunds.html">Refund Policy</a></nav></div>
   </footer>
+  <dialog class="start-panel" id="start-project" aria-labelledby="start-title">
+    <div class="start-inner">
+      <button class="start-close" type="button" data-start-close aria-label="Close Start a Project">✕</button>
+      <p class="eyebrow"><span class="eyebrow-line"></span>Fast contact</p>
+      <h2 id="start-title">Start a Project</h2>
+      <p class="start-lede">Pick the fastest way to reach PRXDIGY.</p>
+      <ul class="start-options" role="list">
+        <li><a class="start-option start-option-primary" href="https://instagram.com/prxdigystudio" target="_blank" rel="noopener noreferrer"><svg class="ig-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="17.4" cy="6.6" r="1.1" fill="currentColor"/></svg><span><strong>DM on Instagram</strong><small>@prxdigystudio</small></span><span aria-hidden="true">↗</span></a></li>
+        <li><a class="start-option" href="sms:+16318709243"><span class="start-glyph" aria-hidden="true">✆</span><span><strong>Text us</strong><small>631-870-9243</small></span><span aria-hidden="true">↗</span></a></li>
+        <li><a class="start-option" href="mailto:prxd.jay@gmail.com?subject=New%20project"><span class="start-glyph" aria-hidden="true">@</span><span><strong>Email</strong><small>prxd.jay@gmail.com</small></span><span aria-hidden="true">↗</span></a></li>
+        <li><a class="start-option" href="/studio/long-island/#book"><span class="start-glyph" aria-hidden="true">●</span><span><strong>Book the Long Island room</strong><small>Apply to book a session</small></span><span aria-hidden="true">↗</span></a></li>
+      </ul>
+    </div>
+  </dialog>
 <!-- PUBLIC FOOTER END -->
 
 <script src="/public.js" defer></script>
