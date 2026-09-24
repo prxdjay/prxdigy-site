@@ -11,7 +11,7 @@ live site isn't shipping unused JS in the meantime.
 | GSAP ScrollTrigger | 3.12.5 | `assets/vendor/gsap/ScrollTrigger.min.js` | Scroll-driven animation |
 | Lenis | 1.1.13 | `assets/vendor/lenis/lenis.min.js` | Smooth scroll |
 | Three.js | r134 | `assets/vendor/three/three.min.js` | 3D/WebGL, required by Vanta |
-| Vanta.js | 0.5.24 | `assets/vendor/vanta/vanta.*.min.js` | Animated 3D backgrounds (fog, net, waves, globe, birds, rings, halo, topology) |
+| Vanta.js | 0.5.24 | `assets/vendor/vanta/vanta.*.min.js` | Animated 3D backgrounds (fog, net, waves, clouds, clouds2, globe, birds, rings, halo, topology) |
 
 All MIT licensed.
 
@@ -27,6 +27,15 @@ All MIT licensed.
 
 Vanta effects each need Three.js loaded first. Only include the specific `vanta.*.min.js`
 file(s) actually used per page — don't load all of them everywhere.
+
+## Starfield — not vendored, build it directly
+
+No preset library for a starfield; Vanta doesn't ship one. Build it as a lightweight
+`THREE.Points` instanced particle field directly against the vendored `three.min.js` —
+this is a standard, cheap technique (a few hundred to a few thousand points, no texture
+needed beyond a soft circular sprite). Pairs with `vanta.clouds`/`vanta.fog` for the
+sky-to-ground descent: stars at the top of the world, dissolving into cloud cover, breaking
+through into the black/chrome/red architecture below.
 
 ## Not vendored (React-only, no npm build in this repo)
 
