@@ -43,6 +43,9 @@ All files below are optimized, metadata-free derivatives. The existing public `a
 | `brooklyn-studio-wide.webp`, `brooklyn-studio-wide-alt.webp` | Real Brooklyn location photos — wide shots of the work room under the X installation |
 | `brooklyn-desk-detail.webp`, `brooklyn-gear-detail.webp` | Real Brooklyn location photos — monitor/desk setup and studio gear detail |
 | `cloud-transition.mp4`, `cloud-transition-poster.jpg` | Compressed from a supplied reference clip of a violet fog/cloud wipe with a light bloom passing through — reference for the descent-through-clouds scroll beat |
+| `wordmark-glitch-dark.webp`, `wordmark-glitch-light-a.webp`, `wordmark-glitch-light-b.webp` | A distressed/glitch-stencil "PRXDIGY X" wordmark treatment — a third brand exploration alongside the chrome GLB and the circular stamp. Not yet approved as canon; still "review brand fit" |
+| `wordmark-glitch-reveal.mp4`, `-poster.jpg` | Compressed from a supplied motion reference: the glitch wordmark snapping into place via motion blur. Useful as a transition technique reference regardless of which wordmark treatment is chosen |
+| `studio-stamp-wide.webp` | Widescreen crop of the circular PRXDIGY STUDIO stamp (existing `assets/logo.png`/`studio-logo.webp` is the square crop) |
 
 The two Creative Projects work images ship with generic filenames and no artist or track metadata. No source `.mov` is served to browsers.
 
