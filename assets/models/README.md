@@ -33,3 +33,29 @@ near-invisible edge-on sliver — confirmed by testing it directly. Rotate the o
 about X, camera looking down at the XZ plane) or place the camera above looking down, then adjust
 from there. Verify with a real render before treating any placement as final, not just a poster
 comparison.
+
+**Fidelity vs. the approved 2D wordmark (`assets/public/wordmark.webp`) — tested directly.**
+The GLB's embedded materials are legitimate PBR chrome (metallic 0.96, roughness 0.22) and red
+enamel (metallic 0.76, roughness 0.24) — real values, not placeholders. But rendered with only
+ambient + directional lights (no environment map), metallic materials have nothing to reflect and
+read as dull gray plastic. Adding a proper environment map is most of the fix:
+
+```js
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new THREE.RoomEnvironment(), 0.04).texture;
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+```
+
+(`RoomEnvironment.js` is the legacy global-script build, same import pattern as `GLTFLoader.js` —
+pull it from the same three.js release, not yet vendored here.)
+
+That single change took the render from flat gray to genuinely glossy chrome with a real
+specular X — confirmed side by side. **What it does not fix:** the 2D original has sharp,
+multi-facet beveled edges (several distinct bevel planes per letter stroke) and a marbled/veined
+red interior; the GLB's ~5,400-triangle geometry is a simpler single-bevel extrusion, so it reads
+as smoother, less "cut-gem," even with correct lighting. Closing that last gap means more bevel
+segments in the source geometry — real remodeling work, not a render setting, and not something
+this environment has tooling for (no Blender here). Treat the environment-lit render as the
+realistic real-time target; flag the remaining facet gap to the user rather than claiming a
+geometry fix that wasn't done.
