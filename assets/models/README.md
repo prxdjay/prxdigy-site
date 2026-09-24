@@ -68,9 +68,28 @@ extruded from a jagged/anti-aliased raster trace rather than a clean path — pr
 from a PNG at some point in the pipeline.
 
 **Fix: don't use `prxdigy-x.glb` for the standalone X moment.** Build it directly in Three.js
-instead — a hand-authored 8-point star `THREE.Shape` (tips at 45°/135°/225°/315°, waist points
-between), extruded with `bevelSegments: 6` and the same chrome-red PBR values as the wordmark's
-enamel material. Tested and confirmed clean: symmetric, sharp tips, proper bevels, no stray
-geometry. Full source in the build prompt's asset section. `prxdigy-wordmark.glb` does not have
-this problem — its geometry is fine, only its lighting needed the environment-map fix above; keep
-using the real GLB for the wordmark.
+instead — see `assets/models/procedural-x.js`, a hand-authored 8-point star `THREE.Shape` (tips
+at 45°/135°/225°/315°, waist points between), extruded with `bevelSegments: 6` and the exact same
+chrome-red PBR values as the wordmark's "inner red enamel" material (not a guessed hex — a hand-
+picked color rendered pink/washed-out in testing). Tested and confirmed clean: symmetric, sharp
+tips, proper bevels, no stray geometry. `prxdigy-wordmark.glb` does not have this problem — its
+geometry is fine, only its lighting needed the environment-map fix above; keep using the real GLB
+for the wordmark.
+
+**Glow recipe, tested and calibrated against `assets/public/creative-projects-ident.mp4`
+(the PCP video's chrome/glow, which was already correct).** On top of the environment-map fix
+above, add restrained bloom — `assets/vendor/three/postprocessing/{EffectComposer,RenderPass,
+ShaderPass,UnrealBloomPass}.js` + `assets/vendor/three/shaders/{CopyShader,LuminosityShader,
+LuminosityHighPassShader}.js`, same legacy global-script pattern as everything else:
+
+```js
+const composer = new THREE.EffectComposer(renderer);
+composer.addPass(new THREE.RenderPass(scene, camera));
+composer.addPass(new THREE.UnrealBloomPass(new THREE.Vector2(W, H), 0.18, 0.3, 0.9));
+// render via composer.render(), not renderer.render()
+```
+
+Strength 0.18 / radius 0.3 / threshold 0.9 are deliberately conservative — tested higher strength
+and lower threshold first, both blew the chrome out to flat white fast. This is a glow accent on
+the ruby-red specifically, not a general bloom over the whole scene. Full before/after comparison
+renders were sent directly to the user during this session, not just described.

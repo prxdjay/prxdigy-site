@@ -1,7 +1,11 @@
 // Clean standalone X, built directly in Three.js — replaces the broken prxdigy-x.glb
 // (1,114 verts for a 4-point shape; raster-trace artifact, see README.md).
-// Requires: THREE.RoomEnvironment + PMREMGenerator for the environment map (see README.md),
-// same chrome-red PBR values as prxdigy-wordmark.glb's "inner red enamel" material.
+// Requires: THREE.RoomEnvironment + PMREMGenerator for the environment map, plus the bloom
+// recipe below (EffectComposer + UnrealBloomPass) for the glow. Material color matches
+// prxdigy-wordmark.glb's own "inner red enamel" values exactly — confirmed by rendering,
+// do not substitute a hand-picked hex color, that's what produced a pink/washed-out result
+// in testing. Calibrated against assets/public/creative-projects-ident.mp4's chrome/glow,
+// which was already correct.
 
 function buildPrxdigyX(outerRadius = 1.28, innerRadius = 0.30) {
   const shape = new THREE.Shape();
@@ -25,13 +29,31 @@ function buildPrxdigyX(outerRadius = 1.28, innerRadius = 0.30) {
   geometry.center();
 
   const material = new THREE.MeshStandardMaterial({
-    color: 0x701212,
-    emissive: 0x0a0000,
     metalness: 0.76,
-    roughness: 0.22
+    roughness: 0.24
   });
+  material.color.setRGB(0.44, 0.008, 0.013);      // exact match to the GLB's "inner red enamel"
+  material.emissive.setRGB(0.035, 0.0003, 0.0005); // same, not a guessed value
 
   const mesh = new THREE.Mesh(geometry, material);
   mesh.rotation.x = -Math.PI / 2; // lies flat like prxdigy-wordmark.glb — rotate to face camera same way
   return mesh;
 }
+
+// Required lighting/glow recipe — without this the chrome reads as dull gray and the ruby
+// as flat red, confirmed by testing both with and without:
+//
+//   const pmrem = new THREE.PMREMGenerator(renderer);
+//   scene.environment = pmrem.fromScene(new THREE.RoomEnvironment(), 0.04).texture;
+//   renderer.outputEncoding = THREE.sRGBEncoding;
+//   renderer.toneMapping = THREE.ACESFilmicToneMapping;
+//   renderer.toneMappingExposure = 1.1;
+//
+//   const composer = new THREE.EffectComposer(renderer);
+//   composer.addPass(new THREE.RenderPass(scene, camera));
+//   composer.addPass(new THREE.UnrealBloomPass(new THREE.Vector2(W,H), 0.18, 0.3, 0.9));
+//   // render via composer.render(), not renderer.render()
+//
+// Bloom params (strength 0.18, radius 0.3, threshold 0.9) are deliberately restrained — higher
+// strength or lower threshold blows the chrome out to flat white fast, confirmed by testing;
+// this is a glow accent on the ruby, not a general bloom over the whole scene.
