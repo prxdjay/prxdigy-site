@@ -36,6 +36,9 @@ All files below are optimized, metadata-free derivatives. The existing public `a
 | `studio-desk-detail.webp` | Existing `assets/environment.png` (astronaut figurine + ashtray, red-lit desk) |
 | `studio-ambient.webp` | Existing `assets/couch-red.png` (blurred bokeh, mic silhouette against studio lights) |
 | `creative-projects-ident.mp4`, `creative-projects-poster.jpg` | Compressed from the supplied PCP brand reveal video (source `.mov`, not served to browsers) |
+| `wordmark-3d-poster.png`, `x-3d-poster.png` | Static fallback renders of `assets/models/*.glb`, recovered from an earlier local build attempt |
+| `prxdigy-x-original.png` | Current flat/vector red X asset (distinct from the 3D chrome X model) |
+| `lifted/studio-*.webp` | Brighter alternate exposure treatments of the same studio photography — candidates for use against a very dark 3D scene where the standard exposure would go muddy |
 
 The two Creative Projects work images ship with generic filenames and no artist or track metadata. No source `.mov` is served to browsers.
 
