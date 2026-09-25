@@ -1,5 +1,6 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { site } from './site-config.mjs';
 
 // `node build.mjs` writes the live site. `node build.mjs --preview <dir>` writes a flat,
@@ -79,12 +80,42 @@ const worldScripts = ['three/three.min.js', 'three/GLTFLoader.js', 'three/meshop
   'three/postprocessing/EffectComposer.js', 'three/postprocessing/RenderPass.js', 'three/postprocessing/ShaderPass.js', 'three/postprocessing/UnrealBloomPass.js',
   'lenis/lenis.min.js'].map(src => `<script src="${V}${src}" defer></script>`).join('');
 
+// ---------- security head ----------
+// GitHub Pages can't send security headers, so the live pages carry them as <meta> tags:
+// a Content Security Policy (only our own files, plus Spotify's player and the booking
+// script), a referrer policy, and a frame-buster (a CSP meta tag can't set frame-ancestors).
+// The one inline script is allowed by its hash. The preview skips all of this: its host
+// frames the page and sets its own policy.
+const headJs = PREVIEW
+  ? "if ('scrollRestoration' in history) history.scrollRestoration = 'manual';"
+  : "if ('scrollRestoration' in history) history.scrollRestoration = 'manual';if (window.top !== window.self) { try { window.top.location.replace(window.location.href); } catch (e) { document.documentElement.style.display = 'none'; } }";
+const headJsHash = createHash('sha256').update(headJs).digest('base64');
+const csp = [
+  "default-src 'self'",
+  `script-src 'self' 'sha256-${headJsHash}' 'wasm-unsafe-eval'`,
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob:",
+  "media-src 'self' blob:",
+  "font-src 'self'",
+  "connect-src 'self' https://script.google.com https://script.googleusercontent.com",
+  "frame-src https://open.spotify.com",
+  "worker-src 'self' blob:",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self' https://script.google.com",
+  'upgrade-insecure-requests',
+].join('; ');
+const securityHead = PREVIEW
+  ? `<script>${headJs}</script>`
+  : `<meta http-equiv="Content-Security-Policy" content="${csp}"><meta name="referrer" content="strict-origin-when-cross-origin"><script>${headJs}</script>`;
+
 function page({ title, description, path, og, active, body, className = '', world = 'lost', schema = '' }) {
   const scene = world !== null;
   const url = `${site.origin}${path}`;
   return `<!doctype html>
 <html lang="en"><head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  ${securityHead}
   <title>${title}</title><meta name="description" content="${description}">
   <link rel="canonical" href="${url}"><meta name="theme-color" content="#050506">
   <meta property="og:type" content="website"><meta property="og:site_name" content="PRXDIGY"><meta property="og:title" content="${title}"><meta property="og:description" content="${description}"><meta property="og:url" content="${url}"><meta property="og:image" content="${site.origin}/assets/public/${og}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
@@ -94,7 +125,6 @@ function page({ title, description, path, og, active, body, className = '', worl
   <link rel="stylesheet" href="${ROOT}public.css">
   ${scene ? `${PREVIEW ? '<script>window.PRX_PREVIEW = true;</script>' : ''}${worldScripts}<script src="${ROOT}world.js" defer></script>` : ''}<script src="${ROOT}public.js" defer></script>
 ${schema ? `  <script type="application/ld+json">${schema}</script>` : ''}
-<script>if ('scrollRestoration' in history) history.scrollRestoration = 'manual';</script>
 </head><body class="${className}"${scene ? ` data-world="${world}" data-assets="${ROOT}assets/" data-models="${modelList}"` : ''}>
   <div class="world-backdrop" aria-hidden="true"></div>${scene ? '<canvas class="world-canvas" aria-hidden="true"></canvas>' : ''}<div class="world-grain" aria-hidden="true"></div>
   ${header(active)}<main id="main">${body}</main>${footer()}<div class="page-wipe" aria-hidden="true"></div></body></html>\n`;
@@ -192,7 +222,7 @@ const longIsland = page({
   <section class="beat section room-gallery" data-beat="gallery"><div class="wrap"><div class="section-heading">${eyebrow('02 / Inside the room')}<h2 data-reveal="glitch">Where the records<br><em>get made.</em></h2><p data-reveal>Real details from the Long Island studio.</p></div><div class="gallery-grid">${gallery.map(([file, alt, w, h, cap, cls]) => `<figure class="${cls}" data-reveal tabindex="0">${img(file, alt, w, h)}${cap ? `<figcaption>${cap}</figcaption>` : ''}</figure>`).join('')}</div></div></section>
   <section class="beat section services-section" data-beat="services"><div class="wrap services-grid${liGear ? ' has-stage' : ''}"><div><div class="section-heading">${eyebrow('03 / What we do')}<h2 data-reveal="glitch">Every part of<br><em>the record.</em></h2><p data-reveal>From the first idea to the final detail.</p></div><div class="service-list">${studioServices.map(([name, description], i) => `<div class="service-row" data-reveal><span>${String(i + 1).padStart(2, '0')}</span><h3>${name}</h3><p>${description}</p></div>`).join('')}</div></div>${liGear ? '<div class="model-stage model-stage-tall" data-anchor="li-gear" aria-hidden="true"></div>' : ''}</div></section>
   <section class="beat section room-story" data-beat="story"><div class="wrap story-grid"><div class="story-image" data-reveal>${img('v2/li-cloud-ceiling.webp', 'Red cloud ceiling with glowing light running through it', 1700, 925)}</div><div class="story-copy">${eyebrow('04 / The atmosphere')}<h2 data-reveal="glitch">The room sets the scene.<br>We set the <em>vibe.</em></h2><p data-reveal>The starlight ceiling and red glow make it easy to settle in, but the people make the session. We lock in with you, bounce ideas around, and bring the right energy to every record.</p><div data-reveal>${img('lifted/studio-astronaut-lifted.webp', 'Astronaut figure on the red-lit desk', 1600, 838)}</div></div></div></section>
-  <section class="beat section booking-section" id="book" data-beat="book"><div class="wrap booking-grid"><div class="booking-intro">${eyebrow('05 / Book the room')}<h2 data-reveal="glitch">Ready to<br><em>lock in?</em></h2><p>Tell us what you're building. If it fits, we'll reach out to plan the session.</p><p class="booking-note">Prefer to talk first? <a href="${sms}">Text PRXDIGY</a> or <a href="${instagram}" ${ext}>DM on Instagram</a>.</p></div><div class="booking-panel glass"><form id="intakeForm" novalidate><div class="form-error-summary" id="formErrors" role="alert" tabindex="-1" hidden></div><div class="form-field"><label for="name">Name <span aria-hidden="true">*</span></label><input id="name" name="name" type="text" autocomplete="name" required></div><div class="form-pair"><div class="form-field"><label for="phone">Phone <span aria-hidden="true">*</span></label><input id="phone" name="phone" type="tel" autocomplete="tel" required></div><div class="form-field"><label for="instagram">Instagram</label><input id="instagram" name="instagram" type="text" placeholder="@" autocomplete="off"></div></div><div class="form-field"><label for="project">What are you working on? <span aria-hidden="true">*</span></label><textarea id="project" name="project" rows="4" required></textarea></div><div class="form-pair"><div class="form-field"><label for="budget">Budget range <span aria-hidden="true">*</span></label><select id="budget" name="budget" required><option value="">Select a range</option><option value="under-500">Under $500</option><option value="500-1500">$500 – $1,500</option><option value="1500-5000">$1,500 – $5,000</option><option value="5000-plus">$5,000+</option></select></div><div class="form-field"><label for="package">Package interest <span aria-hidden="true">*</span></label><select id="package" name="package" required><option value="">Select an area</option><option value="recording">Recording Session</option><option value="mix-master">Mix &amp; Master</option><option value="beats">Beat Production</option><option value="content">Content / Reels</option><option value="creative">Creative Direction</option><option value="songwriting">Songwriting</option><option value="full">Full Rollout</option></select></div></div><div class="form-field"><label for="timeframe">Timeframe <span aria-hidden="true">*</span></label><select id="timeframe" name="timeframe" required><option value="">Select a timeframe</option><option value="asap">ASAP — this week</option><option value="2-weeks">Next 2 weeks</option><option value="month">Within a month</option><option value="flexible">Flexible</option></select></div><div class="form-consent"><input id="consent" name="consent" type="checkbox" required><label for="consent">I agree to the <a href="${L('/privacy.html')}">Privacy Policy</a> and <a href="${L('/terms.html')}">Terms &amp; Conditions</a>. <span aria-hidden="true">*</span></label></div><button class="button button-light form-submit" type="submit">Apply to Book ${arrow}</button><p class="form-disclaimer">By submitting this form, you agree to receive text messages from PRXDIGY STUDIO regarding your booking. Message &amp; data rates may apply. Reply STOP to opt out. See our <a href="${L('/privacy.html')}">Privacy Policy</a> and <a href="${L('/terms.html')}">Terms &amp; Conditions</a>.</p></form><div class="form-success" id="formSuccess" role="status" tabindex="-1" hidden><span aria-hidden="true">✓</span><h3>Request received.</h3><p>We'll reach out shortly if it's a fit. For a faster response, <a href="${sms}">text ${site.text.label}</a>.</p></div></div></div></section>`
+  <section class="beat section booking-section" id="book" data-beat="book"><div class="wrap booking-grid"><div class="booking-intro">${eyebrow('05 / Book the room')}<h2 data-reveal="glitch">Ready to<br><em>lock in?</em></h2><p>Tell us what you're building. If it fits, we'll reach out to plan the session.</p><p class="booking-note">Prefer to talk first? <a href="${sms}">Text PRXDIGY</a> or <a href="${instagram}" ${ext}>DM on Instagram</a>.</p></div><div class="booking-panel glass"><form id="intakeForm" novalidate><div class="form-trap" aria-hidden="true"><label for="website">Leave this field empty</label><input id="website" name="website" type="text" tabindex="-1" autocomplete="off"></div><div class="form-error-summary" id="formErrors" role="alert" tabindex="-1" hidden></div><div class="form-field"><label for="name">Name <span aria-hidden="true">*</span></label><input id="name" name="name" type="text" autocomplete="name" maxlength="80" required></div><div class="form-pair"><div class="form-field"><label for="phone">Phone <span aria-hidden="true">*</span></label><input id="phone" name="phone" type="tel" autocomplete="tel" maxlength="30" required></div><div class="form-field"><label for="instagram">Instagram</label><input id="instagram" name="instagram" type="text" placeholder="@" autocomplete="off" maxlength="40"></div></div><div class="form-field"><label for="project">What are you working on? <span aria-hidden="true">*</span></label><textarea id="project" name="project" rows="4" maxlength="2000" required></textarea></div><div class="form-pair"><div class="form-field"><label for="budget">Budget range <span aria-hidden="true">*</span></label><select id="budget" name="budget" required><option value="">Select a range</option><option value="under-500">Under $500</option><option value="500-1500">$500 – $1,500</option><option value="1500-5000">$1,500 – $5,000</option><option value="5000-plus">$5,000+</option></select></div><div class="form-field"><label for="package">Package interest <span aria-hidden="true">*</span></label><select id="package" name="package" required><option value="">Select an area</option><option value="recording">Recording Session</option><option value="mix-master">Mix &amp; Master</option><option value="beats">Beat Production</option><option value="content">Content / Reels</option><option value="creative">Creative Direction</option><option value="songwriting">Songwriting</option><option value="full">Full Rollout</option></select></div></div><div class="form-field"><label for="timeframe">Timeframe <span aria-hidden="true">*</span></label><select id="timeframe" name="timeframe" required><option value="">Select a timeframe</option><option value="asap">ASAP — this week</option><option value="2-weeks">Next 2 weeks</option><option value="month">Within a month</option><option value="flexible">Flexible</option></select></div><div class="form-consent"><input id="consent" name="consent" type="checkbox" required><label for="consent">I agree to the <a href="${L('/privacy.html')}">Privacy Policy</a> and <a href="${L('/terms.html')}">Terms &amp; Conditions</a>. <span aria-hidden="true">*</span></label></div><button class="button button-light form-submit" type="submit">Apply to Book ${arrow}</button><p class="form-disclaimer">By submitting this form, you agree to receive text messages from PRXDIGY STUDIO regarding your booking. Message &amp; data rates may apply. Reply STOP to opt out. See our <a href="${L('/privacy.html')}">Privacy Policy</a> and <a href="${L('/terms.html')}">Terms &amp; Conditions</a>.</p></form><div class="form-success" id="formSuccess" role="status" tabindex="-1" hidden><span aria-hidden="true">✓</span><h3>Request received.</h3><p>We'll reach out shortly if it's a fit. For a faster response, <a href="${sms}">text ${site.text.label}</a>.</p></div></div></div></section>`
 });
 
 // ---------- Creative Projects ----------
@@ -360,6 +390,7 @@ const files = PREVIEW ? [
   ['404.html', notFound],
   ['sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${['/', ...destinations.map(item => item.href), '/team/', '/terms.html', '/privacy.html', '/cookies.html', '/refunds.html'].map(path => `<url><loc>${site.origin}${path}</loc></url>`).join('')}</urlset>\n`],
   ['robots.txt', `User-agent: *\nAllow: /\nDisallow: /portal/\nSitemap: ${site.origin}/sitemap.xml\n`],
+  ['.well-known/security.txt', `Contact: mailto:${site.business.email}\nExpires: ${new Date(Date.now() + 365 * 864e5).toISOString().slice(0, 10)}T00:00:00Z\nPreferred-Languages: en\nCanonical: ${site.origin}/.well-known/security.txt\n`],
 ];
 for (const [name, contents] of files) {
   const target = out + name;
@@ -374,6 +405,9 @@ if (!PREVIEW) for (const name of ['privacy.html', 'terms.html']) {
   let html = await readFile(name, 'utf8');
   html = html.replace('href="styles.css"', 'href="/public.css"');
   if (!html.includes('src="/public.js"')) html = html.replace('</body>', '<script src="/public.js" defer></script>\n</body>');
+  const secBlock = `<!-- SECURITY HEAD START -->${securityHead}<!-- SECURITY HEAD END -->`;
+  if (html.includes('<!-- SECURITY HEAD START -->')) html = html.replace(/<!-- SECURITY HEAD START -->[\s\S]*?<!-- SECURITY HEAD END -->/, secBlock);
+  else html = html.replace(/(<meta charset="[^"]*">)/i, `$1\n${secBlock}`);
   html = html.replaceAll('sms:+18884958012', sms).replaceAll('+1 (888) 495-8012', site.text.label);
   const sharedHeader = `<!-- PUBLIC HEADER START -->\n${header(name === 'terms.html' ? '/terms.html' : '')}\n<!-- PUBLIC HEADER END -->`;
   const sharedFooter = `<!-- PUBLIC FOOTER START -->\n${footer()}\n<!-- PUBLIC FOOTER END -->`;

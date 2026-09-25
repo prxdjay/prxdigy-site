@@ -133,6 +133,23 @@ if (form) {
     }
     errorSummary.hidden = true;
 
+    // Spam guards: bots fill the hidden field or submit within a couple of seconds, and a
+    // person rarely needs to send twice in a minute. Bots get a quiet "sent" with nothing sent.
+    const looksLikeBot = (field('website') && field('website').value) || performance.now() < 2500;
+    let lastSent = 0;
+    try { lastSent = +sessionStorage.getItem('prx-booking-sent') || 0; } catch (e) { /* storage blocked */ }
+    if (!looksLikeBot && Date.now() - lastSent < 60000) {
+      errorSummary.hidden = false;
+      errorSummary.textContent = 'Your request was just sent. Give it a minute before sending another.';
+      errorSummary.focus();
+      return;
+    }
+    if (looksLikeBot) {
+      form.hidden = true;
+      success.hidden = false;
+      return;
+    }
+
     const data = {
       name: field('name').value.trim(),
       phone: field('phone').value.trim(),
@@ -155,6 +172,7 @@ if (form) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
+      try { sessionStorage.setItem('prx-booking-sent', String(Date.now())); } catch (e) { /* storage blocked */ }
       form.hidden = true;
       success.hidden = false;
       success.focus();
