@@ -1,0 +1,16 @@
+# GitHub Pages (Jekyll) settings. Only the built site is published: build scripts, notes,
+# source photos, and database files stay in the repo but are not served.
+include:
+  - .well-known
+exclude:
+  - README.md
+  - WORLD.md
+  - build.mjs
+  - site-config.mjs
+  - supabase
+  - portal/README.md
+  - portal/supabase-schema.sql
+  - assets/incoming
+  - assets/models/README.md
+  - assets/models/procedural-x.js
+  - screenshots
