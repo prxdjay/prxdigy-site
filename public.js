@@ -1,3 +1,15 @@
+// Every page opens at the top (a #link still lands on its section). The browser would
+// otherwise restore the last scroll position, including on back/forward.
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+const toTop = () => {
+  if (location.hash && location.hash !== '#start-project') return;
+  window.scrollTo(0, 0);
+  if (window.prxLenis) window.prxLenis.scrollTo(0, { immediate: true, force: true });
+};
+toTop();
+window.addEventListener('load', toTop);
+window.addEventListener('pageshow', event => { if (event.persisted) toTop(); });
+
 const motionReduced = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 const menuButton = document.querySelector('.menu-toggle');

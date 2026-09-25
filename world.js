@@ -952,6 +952,7 @@
   let lenis = null;
   if (!reduce && window.Lenis) {
     lenis = new window.Lenis({ lerp: 0.085, wheelMultiplier: 0.9 });
+    window.prxLenis = lenis;
     document.addEventListener('click', e => {
       const a = e.target.closest('a[href*="#"]');
       if (!a) return;

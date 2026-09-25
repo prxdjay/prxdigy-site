@@ -94,6 +94,7 @@ function page({ title, description, path, og, active, body, className = '', worl
   <link rel="stylesheet" href="${ROOT}public.css">
   ${scene ? `${PREVIEW ? '<script>window.PRX_PREVIEW = true;</script>' : ''}${worldScripts}<script src="${ROOT}world.js" defer></script>` : ''}<script src="${ROOT}public.js" defer></script>
 ${schema ? `  <script type="application/ld+json">${schema}</script>` : ''}
+<script>if ('scrollRestoration' in history) history.scrollRestoration = 'manual';</script>
 </head><body class="${className}"${scene ? ` data-world="${world}" data-assets="${ROOT}assets/" data-models="${modelList}"` : ''}>
   <div class="world-backdrop" aria-hidden="true"></div>${scene ? '<canvas class="world-canvas" aria-hidden="true"></canvas>' : ''}<div class="world-grain" aria-hidden="true"></div>
   ${header(active)}<main id="main">${body}</main>${footer()}<div class="page-wipe" aria-hidden="true"></div></body></html>\n`;
