@@ -51,6 +51,7 @@ The Long Island application keeps the existing Google Apps Script endpoint and s
 | `team-sy4ni.glb` | Pink Prodigy Streetwear | The Team, SY4NI card |
 | `team-jude.glb` | Turn the person in my… | The Team, JUDE card |
 | `team-daniels-coffin.glb` | Denim Vigilante | The Team, Daniel's Coffin card |
+| `team-leather.glb` | Midnight Streetwear | The Team, fifth card (name TBA) |
 | `pill-capsule.glb` | Clean Chrome Capsule | Kept for reference; the page uses the code-built glass pill so the X can sit inside real glass |
 
 The source exports were 12–30MB and up to 3.7M triangles each. They were compressed with gltf-transform (meshopt geometry, WebP textures at 1024–2048px, simplified to 28k–166k triangles), 14MB total. `assets/vendor/three/meshopt_decoder.js` decodes them. The uncompressed originals stay in the Drive folder, not in this repo.

@@ -36,6 +36,9 @@ export const site = {
       bio: 'Part of the PRXDIGY family. On the records and behind the visuals.' },
     { name: "Daniel's Coffin", handle: null, role: 'Artist', model: 'team-daniels-coffin',
       bio: 'Part of the PRXDIGY family. Own lane, own sound.' },
+    // Name, role, and handle to come from the owner.
+    { name: 'TBA', handle: null, role: 'Artist', model: 'team-leather',
+      bio: 'Part of the PRXDIGY family. Name drops soon.' },
   ],
   results: [
     { value: 20, suffix: 'M+', label: 'Spotify streams generated in 2026' },
