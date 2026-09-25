@@ -1,3 +1,15 @@
+// Every page opens at the top (a #link still lands on its section). The browser would
+// otherwise restore the last scroll position, including on back/forward.
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+const toTop = () => {
+  if (location.hash && location.hash !== '#start-project') return;
+  window.scrollTo(0, 0);
+  if (window.prxLenis) window.prxLenis.scrollTo(0, { immediate: true, force: true });
+};
+toTop();
+window.addEventListener('load', toTop);
+window.addEventListener('pageshow', event => { if (event.persisted) toTop(); });
+
 const motionReduced = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 const menuButton = document.querySelector('.menu-toggle');
@@ -30,27 +42,56 @@ if (menuButton && navigation) {
 
 const results = document.querySelector('.results-grid');
 if (results && !motionReduced.matches && 'IntersectionObserver' in window) {
+  // Counts up once, slowly, when the section is properly in view. Each figure starts at 0,
+  // is staggered behind the one before it, and eases out so the last digits land heavy.
+  const counters = [...results.querySelectorAll('[data-count-to]')];
+  counters.forEach(counter => { counter.textContent = `0${counter.dataset.suffix}`; });
   const observer = new IntersectionObserver(entries => {
-    if (!entries[0].isIntersecting) return;
+    if (!entries.some(entry => entry.isIntersecting)) return;
     observer.disconnect();
-    const counters = [...results.querySelectorAll('[data-count-to]')];
-    const duration = 1150;
+    const duration = 3600, stagger = 450;
     let start;
     function frame(timestamp) {
       if (start === undefined) start = timestamp;
-      const progress = Math.min(1, (timestamp - start) / duration);
-      const eased = 1 - (1 - progress) ** 3;
-      counters.forEach(counter => {
+      let running = false;
+      counters.forEach((counter, i) => {
         const target = Number(counter.dataset.countTo);
+        const progress = Math.min(1, Math.max(0, (timestamp - start - i * stagger) / duration));
+        const eased = 1 - (1 - progress) ** 4;
         counter.textContent = `${Math.round(target * eased)}${counter.dataset.suffix}`;
+        if (progress < 1) running = true;
       });
-      if (progress < 1 && !motionReduced.matches) requestAnimationFrame(frame);
-      else counters.forEach(counter => { counter.textContent = `${counter.dataset.countTo}${counter.dataset.suffix}`; });
+      if (running) requestAnimationFrame(frame);
     }
     requestAnimationFrame(frame);
-  }, { threshold: 0.25 });
+  }, { threshold: 0.45 });
   observer.observe(results);
 }
+
+// Spotify: the player is added as its section comes near, so nothing loads from Spotify on
+// pages or scroll positions that never reach it. A direct link shows if it is slow or blocked.
+document.querySelectorAll('.embed-shell[data-embed-src]').forEach(shell => {
+  const mount = () => {
+    const frame = document.createElement('iframe');
+    frame.title = 'PRXDIGY Studio playlist on Spotify';
+    frame.src = shell.dataset.embedSrc;
+    frame.width = '100%';
+    frame.height = '352';
+    frame.frameBorder = '0';
+    frame.allow = 'autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture';
+    const ready = () => { shell.classList.remove('is-loading'); shell.classList.add('is-loaded'); };
+    frame.addEventListener('load', ready);
+    setTimeout(() => { if (!shell.classList.contains('is-loaded')) shell.classList.add('is-fallback'); }, 9000);
+    shell.appendChild(frame);
+  };
+  if (!('IntersectionObserver' in window)) { mount(); return; }
+  const watch = new IntersectionObserver(entries => {
+    if (!entries.some(entry => entry.isIntersecting)) return;
+    watch.disconnect();
+    mount();
+  }, { rootMargin: '900px 0px' });
+  watch.observe(shell);
+});
 
 // Preserve the existing Google Apps Script booking endpoint and payload.
 const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbz7x0d230bs_ybXRV9nvEF358S6veuCljHXKPvPLKs4RYew9gu3EIYKz1sw_R5K-soHvg/exec';
@@ -76,9 +117,16 @@ if (form) {
         invalidNames.push(badPhone ? 'a valid phone number' : input.labels[0].textContent.replace('*', '').trim().toLowerCase());
       }
     });
+    const consent = field('consent');
+    const noConsent = consent && !consent.checked;
+    if (consent) consent.setAttribute('aria-invalid', String(noConsent));
+    if (noConsent && !firstInvalid) firstInvalid = consent;
     if (firstInvalid) {
+      const parts = [];
+      if (invalidNames.length) parts.push(`complete ${invalidNames.join(', ')}`);
+      if (noConsent) parts.push('agree to the Privacy Policy and Terms');
       errorSummary.hidden = false;
-      errorSummary.textContent = `Please complete ${invalidNames.join(', ')} before sending your request.`;
+      errorSummary.textContent = `Please ${parts.join(' and ')} before sending your request.`;
       errorSummary.focus();
       firstInvalid.focus();
       return;
@@ -124,4 +172,108 @@ if (form) {
     input.removeAttribute('aria-invalid');
     errorSummary.hidden = true;
   }));
+}
+
+// Header state, scroll reveals, and the scanline wipe between pages.
+const setScrolled = () => document.body.classList.toggle('is-scrolled', window.scrollY > 40);
+setScrolled();
+window.addEventListener('scroll', setScrolled, { passive: true });
+
+const revealables = document.querySelectorAll('[data-reveal]');
+if (motionReduced.matches || !('IntersectionObserver' in window)) {
+  revealables.forEach(el => el.classList.add('is-in'));
+} else {
+  const revealer = new IntersectionObserver(entries => entries.forEach(entry => {
+    if (!entry.isIntersecting) return;
+    entry.target.classList.add('is-in');
+    revealer.unobserve(entry.target);
+  }), { rootMargin: '0px 0px -12% 0px' });
+  revealables.forEach(el => revealer.observe(el));
+}
+
+document.addEventListener('click', event => {
+  const link = event.target.closest('a[href]');
+  if (!link || motionReduced.matches || event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || link.target) return;
+  const url = new URL(link.href, location.href);
+  if (url.origin !== location.origin || url.protocol.indexOf('http') !== 0) return;
+  if (url.pathname === location.pathname && url.hash) return;
+  event.preventDefault();
+  document.body.classList.add('is-leaving');
+  setTimeout(() => { location.href = url.href; }, 420);
+});
+window.addEventListener('pageshow', () => document.body.classList.remove('is-leaving'));
+
+// Blended videos stay hidden until real frames are playing, so no black box flashes first.
+document.querySelectorAll('video.reveal-on-play').forEach(video => {
+  const show = () => video.classList.add('is-playing');
+  // Browsers that can't play the file get the still frame instead of an empty spot.
+  const fail = () => { if (!video.classList.contains('is-playing')) video.parentElement.classList.add('video-failed'); };
+  if (!video.canPlayType('video/mp4; codecs="avc1.42E01E"')) fail();
+  video.addEventListener('error', fail);
+  setTimeout(fail, 6000);
+  video.addEventListener('playing', show);
+  if (motionReduced.matches) video.addEventListener('loadeddata', show);
+  if (video.readyState >= 3 && !video.paused) show();
+});
+
+// Pause/play for the looping videos; reduced-motion visitors start paused.
+document.querySelectorAll('.media-toggle').forEach(button => {
+  const video = document.getElementById(button.dataset.media);
+  if (!video) return;
+  const sync = () => {
+    const paused = video.paused;
+    button.setAttribute('aria-pressed', String(paused));
+    button.setAttribute('aria-label', paused ? 'Play video' : 'Pause video');
+    button.classList.toggle('is-paused', paused);
+  };
+  if (motionReduced.matches) { video.removeAttribute('autoplay'); video.pause(); }
+  button.addEventListener('click', () => { if (video.paused) video.play(); else video.pause(); });
+  video.addEventListener('play', sync);
+  video.addEventListener('pause', sync);
+  sync();
+});
+
+// Photo reel: auto-drifts with a mouse; on touch screens it becomes a swipeable strip.
+const reelTrack = document.querySelector('.reel-track');
+if (reelTrack && window.matchMedia('(hover: none)').matches) {
+  reelTrack.closest('.reel').classList.add('is-touch');
+  reelTrack.querySelectorAll('[aria-hidden="true"].reel-item').forEach(item => item.remove());
+}
+
+// Gallery tiles: tap toggles the same lift/caption state a mouse gets on hover.
+document.querySelectorAll('.gallery-grid figure').forEach(tile => {
+  tile.addEventListener('click', () => {
+    const on = !tile.classList.contains('is-active');
+    tile.parentElement.querySelectorAll('.is-active').forEach(other => other.classList.remove('is-active'));
+    tile.classList.toggle('is-active', on);
+  });
+});
+
+// Start a Project: every "#start-project" link opens the fast-contact panel (a native dialog, so
+// focus is trapped and Esc closes it). Capture phase so smooth-scroll never grabs these links.
+const startPanel = document.getElementById('start-project');
+if (startPanel && typeof startPanel.showModal === 'function') {
+  let opener = null;
+  const open = trigger => {
+    opener = trigger || document.activeElement;
+    startPanel.showModal();
+    document.body.classList.add('start-open');
+    const first = startPanel.querySelector('.start-option');
+    if (first) first.focus();
+  };
+  const close = () => startPanel.close();
+  startPanel.addEventListener('close', () => {
+    document.body.classList.remove('start-open');
+    if (opener && opener.focus) opener.focus();
+  });
+  document.addEventListener('click', event => {
+    const link = event.target.closest('a[href$="#start-project"]');
+    if (!link) return;
+    event.preventDefault();
+    event.stopPropagation();
+    open(link);
+  }, true);
+  startPanel.querySelector('[data-start-close]').addEventListener('click', close);
+  startPanel.addEventListener('click', event => { if (event.target === startPanel) close(); });
+  if (location.hash === '#start-project') open();
 }
