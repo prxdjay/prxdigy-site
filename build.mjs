@@ -176,9 +176,12 @@ const liGear = hasModel('uad-sphere') || hasModel('fuji-xh2s');
 const playlistUrl = 'https://open.spotify.com/playlist/1gKUydEemsUPCpqJVEd2NQ';
 // The preview host blocks third-party iframes, so the shared preview shows a card instead.
 const spotifyEmbed = 'https://open.spotify.com/embed/playlist/1gKUydEemsUPCpqJVEd2NQ?utm_source=generator&amp;theme=0';
-// Click-to-load: nothing from Spotify (and none of its cookies) loads until the visitor asks for
-// the player. The preview host blocks third-party frames, so previews only offer the link.
-const spotify = `<div data-reveal><div class="spotify-frame glass embed-shell${PREVIEW ? '' : ' is-idle'}"${PREVIEW ? '' : ` data-embed-src="${spotifyEmbed}"`}><div class="embed-card"><p class="kicker">Spotify / Playlist</p><strong>PRXDIGY Studio</strong>${PREVIEW ? '<p class="embed-note">The player loads on the live site. The preview can\'t embed Spotify.</p>' : ''}<div class="action-row">${PREVIEW ? '' : `<button class="button button-light embed-load" type="button">Load Spotify player ${arrow.replace('↗', '▶')}</button>`}<a class="button button-outline" href="${playlistUrl}" ${ext}>Open in Spotify ${arrow}</a></div>${PREVIEW ? '' : `<p class="embed-note">Loading the player connects to Spotify, which may set its own cookies. <a href="${L('/cookies.html')}">Cookie Policy</a></p>`}</div><a class="embed-fallback" href="${playlistUrl}" ${ext}>Open the playlist on Spotify ${arrow}</a></div></div>`;
+// Live site: the Spotify player loads by itself as the section scrolls near (nothing from
+// Spotify loads before that). The preview host blocks third-party frames, so previews only
+// offer the link.
+const spotify = PREVIEW
+  ? `<div data-reveal><div class="spotify-frame glass embed-shell is-idle"><div class="embed-card"><p class="kicker">Spotify / Playlist</p><strong>PRXDIGY Studio</strong><p class="embed-note">The player loads on the live site. The preview can't embed Spotify.</p><div class="action-row"><a class="button button-outline" href="${playlistUrl}" ${ext}>Open in Spotify ${arrow}</a></div></div></div></div>`
+  : `<div data-reveal><div class="spotify-frame glass embed-shell is-loading" data-embed-src="${spotifyEmbed}"><div class="embed-loading" aria-hidden="true"><span class="embed-spinner"></span><span class="embed-loading-text">Loading the playlist</span></div><a class="embed-fallback" href="${playlistUrl}" ${ext}>Open the playlist on Spotify ${arrow}</a></div><p class="embed-note embed-credit"><a href="${playlistUrl}" ${ext}>Open in Spotify ${arrow}</a> · Player by Spotify, which may set its own cookies. <a href="${L('/cookies.html')}">Cookie Policy</a></p></div>`;
 
 const longIsland = page({
   title: 'PRXDIGY Studio Long Island — Recording, Mixing & Production',
@@ -287,7 +290,7 @@ const cookies = page({
   <ul>
     <li>Our public pages do <strong>not</strong> set cookies.</li>
     <li>We do not use analytics, advertising, or tracking pixels.</li>
-    <li>The Spotify player on the Long Island page only loads after you choose to load it. Once loaded, Spotify may set its own cookies.</li>
+    <li>The Spotify player on the Long Island page loads when you scroll to it. Spotify may then set its own cookies.</li>
   </ul>
   <h2 id="what">What cookies are</h2>
   <p>Cookies are small text files a website stores in your browser. Similar technologies, like local storage, keep information on your device in the same way.</p>
@@ -296,7 +299,7 @@ const cookies = page({
   <p>The private staff portal (<code>/portal/</code>) uses storage that is strictly necessary to keep staff signed in. It is not used by visitors.</p>
   <h2 id="third-party">Third-party services</h2>
   <ul>
-    <li><strong>Spotify.</strong> The playlist player on the Long Island page is off until you press “Load Spotify player.” After that, Spotify’s <a href="https://www.spotify.com/legal/cookies-policy/" target="_blank" rel="noopener noreferrer">cookie policy</a> applies to the player.</li>
+    <li><strong>Spotify.</strong> The playlist player on the Long Island page loads from Spotify when you scroll to it. Spotify’s <a href="https://www.spotify.com/legal/cookies-policy/" target="_blank" rel="noopener noreferrer">cookie policy</a> applies to the player.</li>
     <li><strong>Booking form.</strong> When you apply to book, your answers are sent to a Google Apps Script we use to receive requests. The form does not set cookies.</li>
     <li><strong>Links to Instagram, text, and email.</strong> These open other apps or sites, which have their own policies.</li>
     <li><strong>Hosting.</strong> The site is hosted on GitHub Pages, which may keep technical logs (such as IP addresses) for security. See <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener noreferrer">GitHub’s privacy statement</a>.</li>

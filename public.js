@@ -68,26 +68,29 @@ if (results && !motionReduced.matches && 'IntersectionObserver' in window) {
   observer.observe(results);
 }
 
-// Spotify: click-to-load. The iframe is only created when the visitor presses the button.
+// Spotify: the player is added as its section comes near, so nothing loads from Spotify on
+// pages or scroll positions that never reach it. A direct link shows if it is slow or blocked.
 document.querySelectorAll('.embed-shell[data-embed-src]').forEach(shell => {
-  const load = shell.querySelector('.embed-load');
-  if (!load) return;
-  load.addEventListener('click', () => {
-    shell.classList.remove('is-idle');
-    shell.classList.add('is-loading');
+  const mount = () => {
     const frame = document.createElement('iframe');
     frame.title = 'PRXDIGY Studio playlist on Spotify';
     frame.src = shell.dataset.embedSrc;
     frame.width = '100%';
     frame.height = '352';
+    frame.frameBorder = '0';
     frame.allow = 'autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture';
     const ready = () => { shell.classList.remove('is-loading'); shell.classList.add('is-loaded'); };
     frame.addEventListener('load', ready);
-    window.addEventListener('message', event => { if (event.origin === 'https://open.spotify.com') ready(); });
     setTimeout(() => { if (!shell.classList.contains('is-loaded')) shell.classList.add('is-fallback'); }, 9000);
     shell.appendChild(frame);
-    frame.focus();
-  }, { once: true });
+  };
+  if (!('IntersectionObserver' in window)) { mount(); return; }
+  const watch = new IntersectionObserver(entries => {
+    if (!entries.some(entry => entry.isIntersecting)) return;
+    watch.disconnect();
+    mount();
+  }, { rootMargin: '900px 0px' });
+  watch.observe(shell);
 });
 
 // Preserve the existing Google Apps Script booking endpoint and payload.

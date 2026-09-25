@@ -776,3 +776,8 @@ video.reveal-on-play.is-playing{opacity:1}
   .footer-legal a{min-height:40px}
   .footer-top a:not(.footer-identity a){font-size:14px}
 }
+/* Spotify player: loads on approach */
+.embed-shell[data-embed-src]{min-height:376px;padding:12px;border-radius:14px}
+.embed-shell iframe{display:block;border:0;border-radius:12px}
+.embed-loading-text{color:var(--subtle);font:500 10px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase}
+.embed-credit{margin-top:12px}
