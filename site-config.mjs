@@ -24,6 +24,19 @@ export const site = {
     { label: 'Cookie Policy', href: '/cookies.html' },
     { label: 'Refund Policy', href: '/refunds.html' },
   ],
+  // The Team. `model` = assets/models/<model>.glb (the 3D character shown on the card).
+  // Swap a model here if a character is matched to the wrong person.
+  team: [
+    { name: 'PRXDIGY', handle: 'prxd.jay', role: 'Founder · Artist · Producer · Engineer', model: 'team-prxdigy',
+      bio: 'Started PRXDIGY. Makes the records, engineers the sessions, and runs the vision from Long Island to Brooklyn.',
+      spotify: 'https://open.spotify.com/artist/2BXB6wbzCaQKOx0kP4sTip' },
+    { name: 'SY4NI', handle: 'yanidakoza', role: 'Artist', model: 'team-sy4ni',
+      bio: 'Part of the PRXDIGY family. Brings the energy to every session and every rollout.' },
+    { name: 'JUDE', handle: 'isjudeok', role: 'Artist', model: 'team-jude',
+      bio: 'Part of the PRXDIGY family. On the records and behind the visuals.' },
+    { name: "Daniel's Coffin", handle: null, role: 'Artist', model: 'team-daniels-coffin',
+      bio: 'Part of the PRXDIGY family. Own lane, own sound.' },
+  ],
   results: [
     { value: 20, suffix: 'M+', label: 'Spotify streams generated in 2026' },
     { value: 3, suffix: 'M+', label: 'YouTube views generated in 2026' },

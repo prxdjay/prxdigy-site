@@ -40,17 +40,17 @@ function footer() {
   return `<footer class="site-footer" id="footer">
     <div class="wrap footer-top">
       <div class="footer-identity"><a href="${L('/')}" aria-label="PRXDIGY home"><img src="${A}wordmark.webp" alt="PRXDIGY" width="1200" height="400"></a><p>Music. Content. Direction. Growth.</p></div>
-      <nav aria-label="Footer destinations"><span class="footer-label">Explore</span>${destinations.map(item => `<a href="${L(item.href)}">${item.label}</a>`).join('')}</nav>
+      <nav aria-label="Footer destinations"><span class="footer-label">Explore</span>${site.nav.map(item => `<a href="${L(item.href)}">${item.label}</a>`).join('')}</nav>
       <div class="footer-contact"><span class="footer-label">Connect</span><a href="${instagram}" ${ext}>Instagram ${site.instagram.label}</a><a href="${sms}">Text ${site.text.label}</a></div>
     </div>
-    <div class="wrap footer-bottom"><p class="footer-business">© ${new Date().getFullYear()} ${site.business.name} · ${site.business.location} · <a href="mailto:${site.business.email}">${site.business.email}</a></p><nav class="footer-legal" aria-label="Legal">${site.legal.map(item => `<a href="${L(item.href)}">${item.label.replace('&', '&amp;')}</a>`).join('')}</nav></div>
+    <div class="wrap footer-bottom"><p class="footer-business"><span>© ${new Date().getFullYear()} ${site.business.name} · ${site.business.location}</span><span class="footer-sep" aria-hidden="true"> · </span><a href="mailto:${site.business.email}">${site.business.email}</a></p><nav class="footer-legal" aria-label="Legal">${site.legal.map(item => `<a href="${L(item.href)}">${item.label.replace('&', '&amp;')}</a>`).join('')}</nav></div>
   </footer>
   ${startPanel()}`;
 }
 
 // Finalized GLB models (see assets/models/README.md). Only files that exist are announced to
 // world.js, and a page only reserves room for a model it can actually show.
-const MODELS = ['uad-sphere', 'fuji-xh2s', 'tlm-103', 'prxdigy-x-final', 'studio-badge', 'creative-emblem', 'prxdigy-logo-3d'];
+const MODELS = ['uad-sphere', 'fuji-xh2s', 'tlm-103', 'prxdigy-x-final', 'studio-badge', 'creative-emblem', 'prxdigy-logo-3d', ...site.team.map(m => m.model)];
 const hasModel = name => existsSync(`assets/models/${name}.glb`);
 const modelList = MODELS.filter(hasModel).join(',');
 
@@ -207,7 +207,7 @@ const creative = page({
   description: 'PRXDIGY Creative Projects builds strategy, content, campaigns, music, visuals, and rollout systems that help artists and brands grow.',
   path: '/creative-projects/', og: 'og-creative.jpg', active: destinations[1].href, className: 'page-creative', world: 'creative',
   body: `<section class="beat division-hero creative-hero" data-beat="hero"><div class="wrap division-hero-grid"><div class="division-hero-copy"><img class="creative-hero-logo" src="${A}creative-logo-tight.webp" alt="PRXDIGY Creative Projects" width="556" height="345"><p class="eyebrow">PRXDIGY / Creative Projects</p><h1 class="stack hero-stack">${lines('Creative direction:', 'where vision becomes <em>reality.</em>')}</h1><p class="hero-description">We build the strategy, content, music, visuals, and rollout that help artists and brands grow.</p><div class="action-row"><a class="button button-light" href="#creative-contact">Start a Creative Project ${down}</a>${igLink('DM on Instagram')}</div></div><div class="ident-frame"><video id="ident-video" src="${A}creative-projects-ident.mp4" poster="${A}creative-projects-still.webp" autoplay muted loop playsinline preload="metadata" aria-label="PRXDIGY Creative Projects ident"></video>${pauseButton('ident-video')}<span class="image-caption">Concept / Production / Rollout</span></div></div></section>
-  <section class="beat section results-section" id="results" data-beat="results"><div class="wrap results-wrap">${eyebrow('01 / Verified 2026 totals')}<h2 data-reveal="glitch">Results</h2><div class="results-grid">${site.results.map(item => `<div class="result" data-reveal><div class="result-number"><span class="sr-only">${item.value}${item.suffix}</span><span aria-hidden="true" data-count-to="${item.value}" data-suffix="${item.suffix}">${item.value}${item.suffix}</span></div><p>${item.label}</p></div>`).join('')}</div></div></section>
+  <section class="beat section results-section" id="results" data-beat="results"><div class="wrap results-wrap"><div class="pill-bay" aria-hidden="true"></div>${eyebrow('01 / Verified 2026 totals')}<h2 data-reveal="glitch">Results</h2><div class="results-grid">${site.results.map(item => `<div class="result" data-reveal><div class="result-number"><span class="sr-only">${item.value}${item.suffix}</span><span aria-hidden="true" data-count-to="${item.value}" data-suffix="${item.suffix}">${item.value}${item.suffix}</span></div><p>${item.label}</p></div>`).join('')}</div></div></section>
   <section class="beat section creative-services" data-beat="capabilities"><div class="wrap"><div class="section-heading">${eyebrow('02 / What we do')}<h2 data-reveal="glitch">More than content.<br><em>We build momentum.</em></h2><p data-reveal>One connected team across strategy, creation, and the release.</p></div><div class="capability-list">${creativeCapabilities.map(([name, description], i) => `<div class="capability" data-reveal><span>${String(i + 1).padStart(2, '0')}</span><h3>${name}</h3><p>${description}</p></div>`).join('')}</div></div></section>
   <section class="beat section selected-work" data-beat="work"><div class="wrap"><div class="section-heading">${eyebrow('03 / In practice')}<h2 data-reveal="glitch">Portfolio picks</h2><p data-reveal>A glimpse into our world.</p></div><div class="work-grid"><figure class="work-item" data-reveal><div class="work-image work-feather">${img('creative-projects-still.webp', 'The PRXDIGY Creative Projects emblem over a wet black floor', 1280, 854)}</div><figcaption><span>01 / Artist rollout</span><h3>A visual world built around the release.</h3><p>Performance content, production, and rollout assets.</p></figcaption></figure><figure class="work-item" data-reveal><div class="work-image work-image-invert"><video id="glitch-video" class="reveal-on-play" src="${A}wordmark-glitch-reveal.mp4" autoplay muted loop playsinline preload="auto" aria-label="PRXDIGY wordmark glitch reveal"></video><img class="video-fallback" src="${A}wordmark-glitch-reveal-poster.jpg" alt="" width="1280" height="720" loading="lazy">${pauseButton('glitch-video')}</div><figcaption><span>02 / Visual production</span><h3>Make the moment feel like the music.</h3><p>Concept, shoot direction, editing, and social-ready content.</p></figcaption></figure></div><figure class="work-wide work-glass" data-reveal>${img('creative-pill-shatter.webp', 'The PCP capsule shattering on a wet black floor', 1672, 941, 'loading="lazy" decoding="async"', '100vw')}</figure></div></section>
   <section class="beat section process-section" data-beat="process"><div class="wrap process-grid"><div class="process-heading">${eyebrow('04 / How it connects')}<h2 data-reveal="glitch">The full<br><em>package.</em></h2><p data-reveal>We can help shape the idea, define the direction, create the content, release the work, and measure what happens next.</p></div><div><ol class="process-list">${processSteps.map((step, i) => `<li data-reveal><span>${String(i + 1).padStart(2, '0')}</span>${step}</li>`).join('')}</ol><div class="support-list" data-reveal><p>Connected capabilities</p><ul>${support.map(item => `<li>${item}</li>`).join('')}</ul></div><p class="process-close" data-reveal>From idea to execution, everything is done here.</p></div></div></section>
@@ -241,13 +241,27 @@ const brooklyn = page({
 });
 
 // ---------- The Team ----------
-// Four equal slots. Every field is a clearly marked placeholder until approved profiles arrive.
-const teamSlots = [1, 2, 3, 4];
+// One card per member (site.team): their 3D character on a transparent stage (world.js pins
+// it there), then name, role, a short bio, and links.
+const spotifyIcon = '<svg class="ig-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9.2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M7.4 9.6c3.2-1 6.6-.7 9.4.9M8 12.6c2.6-.8 5.3-.5 7.6.8M8.6 15.4c2-.6 4-.4 5.8.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+const memberCard = (m, i) => {
+  const has3d = hasModel(m.model);
+  const links = [
+    m.handle && `<a class="member-link" href="https://instagram.com/${m.handle}" ${ext} aria-label="${m.name} on Instagram (@${m.handle})">${igIcon}@${m.handle}</a>`,
+    m.spotify && `<a class="member-link" href="${m.spotify}" ${ext} aria-label="${m.name} on Spotify">${spotifyIcon}Spotify</a>`,
+  ].filter(Boolean).join('');
+  return `<li class="member" data-reveal style="--i:${i}"><article>
+    <div class="member-stage${has3d ? '' : ' no-model'}"${has3d ? ` data-anchor="member" data-model="${m.model}"` : ''} aria-hidden="true"><span class="member-index">${String(i + 1).padStart(2, '0')}</span>${has3d ? '<span class="member-hint">Tap to spin</span>' : `<span class="member-initial">${m.name[0]}</span>`}</div>
+    <div class="member-copy"><p class="member-role">${m.role}</p><h3 class="member-name">${m.name.replace("'", '&rsquo;')}</h3><p class="member-bio">${m.bio}</p>${links ? `<div class="member-links">${links}</div>` : ''}</div>
+  </article></li>`;
+};
 const team = page({
   title: 'The Team — PRXDIGY',
   description: 'The people behind PRXDIGY studios and Creative Projects.',
   path: '/team/', og: 'og-home.jpg', active: '/team/', className: 'page-team', world: 'team',
-  body: `<section class="beat team-hero team-tba" data-beat="hero"><div class="wrap team-hero-grid"><div><p class="eyebrow"><span class="eyebrow-line"></span>PRXDIGY / The Team</p><h1 class="glitch-title">The Team</h1><p class="team-tba-note"><span class="status status-blue">In progress</span></p><p class="hero-description">The roster is being put together. To be announced.</p></div>${hasModel('studio-badge') ? '<div class="model-stage team-badge-stage" data-anchor="team-badge" aria-hidden="true"></div>' : `<img class="team-tba-logo" src="${A}studio-logo-alpha.webp" alt="PRXDIGY Studio" width="650" height="650">`}</div></section>`
+  body: `<section class="beat team-hero" data-beat="hero"><div class="wrap team-hero-grid"><div><p class="eyebrow"><span class="eyebrow-line"></span>PRXDIGY / The Team</p><h1 class="glitch-title">The Team</h1><p class="hero-description">The people behind the records, the rooms, and the visuals.</p><a class="text-link team-jump" href="#roster">Meet the roster ${down}</a></div>${hasModel('studio-badge') ? '<div class="model-stage team-badge-stage" data-anchor="team-badge" aria-hidden="true"></div>' : `<img class="team-tba-logo" src="${A}studio-logo-alpha.webp" alt="PRXDIGY Studio" width="650" height="650">`}</div></section>
+  <section class="beat section team-roster" id="roster" data-beat="members"><div class="wrap"><ul class="member-grid">${site.team.map(memberCard).join('')}</ul></div></section>
+  <section class="beat section team-join" data-beat="join"><div class="wrap team-join-inner" data-reveal><p class="eyebrow"><span class="eyebrow-line"></span>Work with us</p><h2 data-reveal="glitch">Your record.<br><em>Our team.</em></h2><a class="button button-light start-link" href="#start-project" aria-haspopup="dialog">Start a Project ${arrow}</a></div></section>`
 });
 
 // ---------- Cookie + Refund policies ----------

@@ -506,6 +506,13 @@
     const X = brandMark(3.9, 3, 0.26, 0.42);
     mon.add(X);
     scene.add(mon);
+    // On phones the X sits smaller and only grows in once the door cards have passed, so it
+    // never sits behind the "three doors" copy.
+    const monScale = f => {
+      if (!portrait()) return 1;
+      const t = Math.min(1, Math.max(0, (f - 2.15) / 0.55));
+      return 0.6 * t * t * (3 - 2 * t) + 0.0001;
+    };
     const redLight = new T.PointLight(0xff2a1a, 2.5, 26, 1.6);
     redLight.position.set(0, floorY + 3.2, -14.5);
     scene.add(redLight);
@@ -541,6 +548,7 @@
         inner.traverse(o => { if (o.material) { o.material.transparent = e < 1; o.material.opacity = e; } });
       }
       mon.rotation.y = Math.sin(clock * 0.25) * 0.1 + (f - 2) * 0.22;
+      mon.scale.setScalar(monScale(f));
       X.rotation.z = Math.sin(clock * 0.4) * 0.015;
       redLight.intensity = 2.5 + Math.sin(clock * 1.4) * 0.4;
       bloomCore.material.opacity = 0.25 + Math.max(0, 1 - Math.abs(f - 1) * 1.4) * 0.3;
@@ -560,9 +568,9 @@
       mobileKeys: {
         sky: { pos: [0, 0, 13], look: [0, -1.7, 0] },
         clouds: { pos: [0, -10.5, 11], look: [0, -9.2, 0] },
-        split: { pos: [0, -22, 17], look: [0, -22.8, -18] },
-        statement: { pos: [0, -23.2, 3], look: [0, MON.y - 2.6, MON.z] },
-        contact: { pos: [0, -23.5, -2.5], look: [0, MON.y - 2.4, MON.z] },
+        split: { pos: [0, -22, 17], look: [0, -27.4, -18], dim: 0.7 },
+        statement: { pos: [0, -23.2, 3], look: [0, MON.y - 5.4, MON.z], dim: 0.6 },
+        contact: { pos: [0, -23.5, -2.5], look: [0, MON.y - 5.2, MON.z], dim: 0.5 },
       },
     };
   }
@@ -591,7 +599,7 @@
     const stamp = new T.Group();
     stamp.add(brandMark(2.35, 4, 0.2, 0.34));
     scene.add(stamp);
-    sideAnchor(stamp, [3.1, 0.2, -1], [0, 2.6, -3]);
+    sideAnchor(stamp, [3.1, 0.2, -1], [0, 3.25, -3.8]);
     const light = new T.PointLight(0xff2a1a, 2, 14, 1.8);
     stamp.add(light); light.position.set(0, -0.4, 2.4);
     const halo = glow(10, [0, 0, -1.2], 0xff3020, 0.32);
@@ -685,9 +693,16 @@
     const cap = makeCapsule();
     const holder = new T.Group();
     holder.add(cap);
-    holder.scale.setScalar(1.02);
-    scene.add(holder);
-    sideAnchor(holder, [3.3, -6.2, -1], [0, -5.8, -2]);
+    // Desktop: the pill floats beside the numbers. Phones: it is pinned into a bay above the
+    // Results heading so it never sits on top of copy.
+    const bay = document.querySelector('.pill-bay');
+    const bayRig = bay ? pinTo(bay, { fill: 1, depth: 9 }) : null;
+    const placePill = () => {
+      if (bayRig && portrait()) { bayRig.add(holder); holder.position.set(0, 0, 0); holder.scale.setScalar(0.34); }
+      else { scene.add(holder); holder.position.set(3.3, -6.2, -1); holder.scale.setScalar(1.02); }
+    };
+    placePill();
+    onResize.push(placePill);
     holder.add(glow(6, [0, -1.6, -0.8], 0xff2a1a, 0.18));
     const light = new T.PointLight(0xff2a1a, 1.6, 12, 1.8);
     light.position.set(0, 0, 2.2);
@@ -802,7 +817,8 @@
     };
   }
 
-  // The Team: a quiet starfield with a blue glow under the portraits.
+  // The Team: a quiet starfield with a blue glow under the badge and the roster. Each member
+  // card pins its 3D character; hovering or tapping the card spins it a full turn.
   function buildTeam() {
     scene.fog = new T.FogExp2(0x03040a, 0.03);
     scene.add(stars(LOW ? 700 : 1300, [-30, 30, -16, 14, -40, 4], 0.18, [0.45, 0.62, 1]));
@@ -810,16 +826,41 @@
     scene.add(floor);
     cloudLayers.push({ mesh: floor, speed: 0.06, span: 52 });
     scene.add(glow(30, [0, -7, -14], 0x2f5bff, 0.28));
+    const key = new T.PointLight(0x5b8cff, 1.4, 30, 1.6);
+    camera.add(key); key.position.set(-2, 2, 2); scene.add(camera);
     const badgeStage = document.querySelector('[data-anchor="team-badge"]');
     if (badgeStage && available.has('studio-badge')) getModel('studio-badge').then(m => {
       if (!m) return;
       const rig = pinTo(badgeStage, { fill: 0.9 });
       rig.add(m);
       presenter(rig, { sway: 0.7, tilt: 0.3 });
-      const key = new T.PointLight(0x5b8cff, 1.4, 30, 1.6);
-      camera.add(key); key.position.set(-2, 2, 2); scene.add(camera);
     });
-    return { bloom: [0.26, 0.35, 0.86], keys: { hero: { pos: [0, 0, 12], look: [0, 0.2, 0] }, members: { pos: [0, -3.5, 12], look: [0, -4.5, 0], dim: 0.7 } } };
+    document.querySelectorAll('[data-anchor="member"]').forEach((stage, i) => {
+      const card = stage.closest('.member');
+      const st = { spin: 0, target: 0, v: 0 };
+      const turn = () => { st.target = Math.round(st.target / (Math.PI * 2)) * Math.PI * 2 + Math.PI * 2; };
+      card.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse') turn(); });
+      card.addEventListener('click', e => { if (!e.target.closest('a')) turn(); });
+      getModel(stage.dataset.model).then(m => {
+        if (!m) { stage.classList.add('no-model'); return; }
+        const rig = pinTo(stage, { fill: 0.94, depth: 8 });
+        rig.add(m);
+        stage.classList.add('has-model');
+        spinners.push((f, dt) => {
+          if (!rig.parent.visible) return;
+          const t = clock + i * 1.7;
+          st.v += (st.target - st.spin) * 18 * dt; st.v *= Math.exp(-6 * dt); st.spin += st.v * dt;
+          if (reduce) st.spin = st.target;
+          rig.rotation.set(-pointer.sy * 0.08, st.spin + Math.sin(t * 0.4) * 0.28 + pointer.sx * 0.3, 0);
+          rig.position.set(0, Math.sin(t * 0.9) * 0.012, 0);
+        });
+      });
+    });
+    return { bloom: [0.26, 0.35, 0.86], keys: {
+      hero: { pos: [0, 0, 12], look: [0, 0.2, 0] },
+      members: { pos: [0, -3.5, 12], look: [0, -4.5, 0], dim: 1 },
+      join: { pos: [0, -6, 12], look: [0, -7, 0], dim: 0.6 },
+    } };
   }
 
   function buildLost() {
