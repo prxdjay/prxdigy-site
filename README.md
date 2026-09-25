@@ -47,11 +47,10 @@ The Long Island application keeps the existing Google Apps Script endpoint and s
 | `tlm-103.glb` | Neumann Studio Microphone | Brooklyn, "On the mic" section |
 | `studio-badge.glb` | Circular Badge Emblem | The Team, beside the heading |
 | `creative-emblem.glb` | Prodigy Emblem Full Ring | Creative Projects, closing section |
-| `team-prxdigy.glb` | PRXDIGY Character | The Team, PRXDIGY card |
+| `team-prxdigy.glb` | Turn the person in my… | The Team, PRXDIGY (Jay) card |
 | `team-sy4ni.glb` | Pink Prodigy Streetwear | The Team, SY4NI card |
-| `team-jude.glb` | Turn the person in my… | The Team, JUDE card |
-| `team-daniels-coffin.glb` | Denim Vigilante | The Team, Daniel's Coffin card |
-| `team-leather.glb` | Midnight Streetwear | The Team, fifth card (name TBA) |
+| `team-jude.glb` | Denim Vigilante | The Team, JUDE card |
+| `team-daniels-coffin.glb` | PRXDIGY Character | The Team, Daniel's Coffin card |
 | `pill-capsule.glb` | Clean Chrome Capsule | Kept for reference; the page uses the code-built glass pill so the X can sit inside real glass |
 
 The source exports were 12–30MB and up to 3.7M triangles each. They were compressed with gltf-transform (meshopt geometry, WebP textures at 1024–2048px, simplified to 28k–166k triangles), 14MB total. `assets/vendor/three/meshopt_decoder.js` decodes them. The uncompressed originals stay in the Drive folder, not in this repo.
