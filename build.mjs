@@ -252,14 +252,14 @@ const memberCard = (m, i) => {
   ].filter(Boolean).join('');
   return `<li class="member" data-reveal style="--i:${i}"><article>
     <div class="member-stage${has3d ? '' : ' no-model'}"${has3d ? ` data-anchor="member" data-model="${m.model}"` : ''} aria-hidden="true"><span class="member-index">${String(i + 1).padStart(2, '0')}</span>${has3d ? '<span class="member-hint">Tap to spin</span>' : `<span class="member-initial">${m.name[0]}</span>`}</div>
-    <div class="member-copy"><p class="member-role">${m.role}</p><h3 class="member-name">${m.name.replace("'", '&rsquo;')}</h3><p class="member-bio">${m.bio}</p>${links ? `<div class="member-links">${links}</div>` : ''}</div>
+    <div class="member-copy"><p class="member-role">${m.role.replace(/&/g, "&amp;")}</p><h3 class="member-name">${m.name.replace("'", '&rsquo;')}</h3><p class="member-bio">${m.bio}</p>${links ? `<div class="member-links">${links}</div>` : ''}</div>
   </article></li>`;
 };
 const team = page({
   title: 'The Team — PRXDIGY',
   description: 'The people behind PRXDIGY studios and Creative Projects.',
   path: '/team/', og: 'og-home.jpg', active: '/team/', className: 'page-team', world: 'team',
-  body: `<section class="beat team-hero" data-beat="hero"><div class="wrap team-hero-grid"><div><p class="eyebrow"><span class="eyebrow-line"></span>PRXDIGY / The Team</p><h1 class="glitch-title">The Team</h1><p class="hero-description">The people behind the records, the rooms, and the visuals.</p><a class="text-link team-jump" href="#roster">Meet the roster ${down}</a></div>${hasModel('studio-badge') ? '<div class="model-stage team-badge-stage" data-anchor="team-badge" aria-hidden="true"></div>' : `<img class="team-tba-logo" src="${A}studio-logo-alpha.webp" alt="PRXDIGY Studio" width="650" height="650">`}</div></section>
+  body: `<section class="beat team-hero" data-beat="hero"><div class="wrap team-hero-grid"><div><p class="eyebrow"><span class="eyebrow-line"></span>PRXDIGY Studios / Meet the Team</p><h1 class="glitch-title">The Team</h1><p class="hero-description">The people behind the records, the rooms, and the visuals.</p><a class="text-link team-jump" href="#roster">Meet the roster ${down}</a></div>${hasModel('studio-badge') ? '<div class="model-stage team-badge-stage" data-anchor="team-badge" aria-hidden="true"></div>' : `<img class="team-tba-logo" src="${A}studio-logo-alpha.webp" alt="PRXDIGY Studio" width="650" height="650">`}</div></section>
   <section class="beat section team-roster" id="roster" data-beat="members"><div class="wrap"><ul class="member-grid">${site.team.map(memberCard).join('')}</ul></div></section>
   <section class="beat section team-join" data-beat="join"><div class="wrap team-join-inner" data-reveal><p class="eyebrow"><span class="eyebrow-line"></span>Work with us</p><h2 data-reveal="glitch">Your record.<br><em>Our team.</em></h2><a class="button button-light start-link" href="#start-project" aria-haspopup="dialog">Start a Project ${arrow}</a></div></section>`
 });
