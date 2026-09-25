@@ -255,6 +255,8 @@ const bkGallery = [
   ['v2/bk-room-wide-blue.webp', 'The Brooklyn room: desk, booth, and fan under blue LED clouds', 1086, 1448, 'g-main'],
   ['brooklyn-studio-wide.webp', 'Wide view of the Brooklyn room from the desk side', 1800, 1199, 'g-wide'],
   ['brooklyn-desk-detail.webp', 'Monitors and keyboard at the Brooklyn desk', 1800, 1199, 'g-wide'],
+  ['v2/bk-booth-close.webp', 'The Brooklyn vocal booth: mic behind a foam shield, headphones hung ready', 1086, 725, 'g-wide'],
+  ['v2/bk-booth-wide.webp', 'The private vocal booth under blue light, looking back toward the control room', 1086, 718, 'g-wide'],
 ];
 // Brooklyn copy written from the photos and the Long Island structure — owner to review.
 const bkServices = [

@@ -32,7 +32,7 @@ export const site = {
       spotify: 'https://open.spotify.com/artist/2BXB6wbzCaQKOx0kP4sTip' },
     { name: 'SY4NI', handle: 'yanidakoza', role: 'Brooklyn Studio Partner & Engineer', model: 'team-sy4ni',
       bio: 'Yanni is an artist, songwriter, and engineer who brings his creative perspective to every project. As a partner at PRXDIGY’s Brooklyn location, he helps artists shape their sound and turn their ideas into finished records.' },
-    { name: "Daniel's Coffin", handle: null, role: 'Recording Engineer & Videographer', model: 'team-daniels-coffin',
+    { name: "Daniel's Coffin", handle: 'danielscoffin', role: 'Recording Engineer & Videographer', model: 'team-daniels-coffin',
       bio: 'Daniel is an artist, songwriter, engineer, and videographer who brings both musical and visual creativity to the team. His versatility allows him to help artists develop their sound while capturing the moments that bring their vision to life.' },
     { name: 'JUDE', handle: 'isjudeok', role: 'Recording Engineer', model: 'team-jude',
       bio: 'Jude is an artist, songwriter, and recording engineer who understands the creative process from both sides of the microphone. He combines his musical perspective with technical expertise to help artists bring their ideas to life.' },
