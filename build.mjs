@@ -285,6 +285,7 @@ const memberCard = (m, i) => {
   const links = [
     m.handle && `<a class="member-link" href="https://instagram.com/${m.handle}" ${ext} aria-label="${m.name} on Instagram (@${m.handle})">${igIcon}@${m.handle}</a>`,
     m.spotify && `<a class="member-link" href="${m.spotify}" ${ext} aria-label="${m.name} on Spotify">${spotifyIcon}Spotify</a>`,
+    m.website && `<a class="member-link" href="${m.website}" ${ext}>PRXD. JAY official artist website ${arrow}</a>`,
   ].filter(Boolean).join('');
   return `<li class="member" data-reveal style="--i:${i}"><article>
     <div class="member-stage${has3d ? '' : ' no-model'}"${has3d ? ` data-anchor="member" data-model="${m.model}"` : ''} aria-hidden="true"><span class="member-index">${String(i + 1).padStart(2, '0')}</span>${has3d ? '<span class="member-hint">Tap to spin</span>' : `<span class="member-initial">${m.name[0]}</span>`}</div>

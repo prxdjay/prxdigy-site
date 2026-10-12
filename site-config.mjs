@@ -29,6 +29,7 @@ export const site = {
   team: [
     { name: 'PRXDIGY', handle: 'prxd.jay', role: 'Founder & Creative Director', model: 'team-prxdigy',
       bio: 'Jay is an artist, songwriter, producer, and engineer with a passion for bringing creative visions to life. As the founder of PRXDIGY Studios, he bridges music, visuals, and artist development to create an environment where creativity has no limits.',
+      website: 'https://prxdjay.com/',
       spotify: 'https://open.spotify.com/artist/2BXB6wbzCaQKOx0kP4sTip' },
     { name: 'SY4NI', handle: 'yanidakoza', role: 'Brooklyn Studio Partner & Engineer', model: 'team-sy4ni',
       bio: 'Yanni is an artist, songwriter, and engineer who brings his creative perspective to every project. As a partner at PRXDIGY’s Brooklyn location, he helps artists shape their sound and turn their ideas into finished records.' },
